@@ -1,0 +1,2896 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CBT Prompt Studio — Generator Prompt Aplikasi CBT Apps Script &amp; GitHub</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Initialize Theme Early to Prevent Flash -->
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('cbt_prompt_studio_theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+  <!-- ==================== TOP NAVIGATION BAR ==================== -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <!-- Brand + School Logo -->
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/70 dark:border-indigo-800/70 p-1.5 flex items-center justify-center shrink-0 overflow-hidden shadow-sm">
+          <img
+            id="navSchoolLogo"
+            src="https://iili.io/Ce8iqts.png"
+            alt="Logo Sekolah"
+            class="w-full h-full object-contain rounded"
+            onerror="this.onerror=null;this.src='https://placehold.co/80x80/4f46e5/ffffff?text=CBT';"
+          />
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900 dark:text-white truncate">
+            CBT Prompt Studio
+          </h1>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
+            GitHub Pages + Google Apps Script + Spreadsheet
+          </p>
+        </div>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="flex items-center gap-2 shrink-0">
+        <button
+          type="button"
+          id="btnOpenDeployGuide"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/70 dark:hover:bg-indigo-900/70 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800 transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="hidden sm:inline">Panduan Deploy</span>
+        </button>
+
+        <button
+          type="button"
+          id="btnOpenReset"
+          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 dark:bg-slate-800 dark:hover:bg-rose-950/50 dark:text-slate-300 dark:hover:text-rose-400 border border-slate-200 dark:border-slate-700 transition"
+          title="Reset semua pengaturan ke default"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span class="hidden md:inline">Reset</span>
+        </button>
+
+        <button
+          type="button"
+          id="btnThemeToggle"
+          class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition"
+          aria-label="Ubah Tema Gelap atau Terang"
+        >
+          <!-- Sun Icon -->
+          <svg id="iconSun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- Moon Icon -->
+          <svg id="iconMoon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN WORKSPACE ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- HERO SUMMARY BANNER -->
+    <div class="rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-sky-600 text-white p-5 sm:p-6 shadow-lg shadow-indigo-600/20">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="flex items-start gap-4 min-w-0">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/95 p-2 shadow-md shrink-0 flex items-center justify-center overflow-hidden">
+            <img
+              id="bannerSchoolLogo"
+              src="https://iili.io/Ce8iqts.png"
+              alt="Logo Sekolah"
+              class="w-full h-full object-contain rounded-lg"
+              onerror="this.onerror=null;this.src='https://placehold.co/100x100/4f46e5/ffffff?text=LOGO';"
+            />
+          </div>
+          <div class="min-w-0 space-y-1">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 backdrop-blur-sm">
+              <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+              Fullstack CBT Blueprint Generator
+            </div>
+            <h2 id="bannerTitlePreview" class="text-lg sm:text-xl font-extrabold tracking-tight truncate">
+              Penilaian Sumatif Akhir Semester — Matematika
+            </h2>
+            <p class="text-xs sm:text-sm text-indigo-100 leading-relaxed">
+              Susun prompt siap pakai untuk membangun CBT anti-curang (HP, Tablet, Laptop), auto-setup Google Sheets, MathJax, gambar <span class="font-semibold underline decoration-white/50">freeimage.host</span>, input soal manual, hingga lampiran file soal.
+            </p>
+          </div>
+        </div>
+
+        <!-- Live Stat Counters -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 shrink-0">
+          <div class="bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2 text-center border border-white/15">
+            <div id="bannerTotalSoal" class="text-lg sm:text-xl font-extrabold">25</div>
+            <div class="text-[11px] text-indigo-100">Target Soal</div>
+          </div>
+          <div class="bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2 text-center border border-white/15">
+            <div id="bannerSoalManual" class="text-lg sm:text-xl font-extrabold">0</div>
+            <div class="text-[11px] text-indigo-100">Soal Manual</div>
+          </div>
+          <div class="bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2 text-center border border-white/15">
+            <div id="bannerDurasi" class="text-lg sm:text-xl font-extrabold">60m</div>
+            <div class="text-[11px] text-indigo-100">Durasi</div>
+          </div>
+          <div class="bg-white/15 backdrop-blur-sm rounded-xl px-3 py-2 text-center border border-white/15">
+            <div id="bannerTotalSiswa" class="text-lg sm:text-xl font-extrabold">0</div>
+            <div class="text-[11px] text-indigo-100">Siswa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TWO-COLUMN BUILDER & LIVE PROMPT STUDIO -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- ==================== LEFT COLUMN: CONFIGURATION CARDS (7 COLS) ==================== -->
+      <div class="lg:col-span-7 space-y-5">
+
+        <!-- CARD 1: IDENTITAS UJIAN & BRANDING SEKOLAH -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 font-bold text-sm flex items-center justify-center shrink-0">
+              1
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Identitas Ujian &amp; Branding Sekolah</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Informasi header aplikasi CBT, mata pelajaran, KKM, dan logo resmi sekolah</p>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label for="schoolName" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Nama Sekolah / Instansi
+                </label>
+                <input
+                  type="text"
+                  id="schoolName"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  placeholder="Contoh: SMA Negeri 1 Nusantara"
+                />
+              </div>
+              <div>
+                <label for="examTitle" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Judul Ujian / Asesmen
+                </label>
+                <input
+                  type="text"
+                  id="examTitle"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  placeholder="Contoh: Penilaian Sumatif Akhir Semester"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label for="subjectName" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Mata Pelajaran
+                </label>
+                <input
+                  type="text"
+                  id="subjectName"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  placeholder="Matematika"
+                />
+              </div>
+              <div>
+                <label for="gradeLevel" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Kelas / Fase
+                </label>
+                <input
+                  type="text"
+                  id="gradeLevel"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  placeholder="Kelas XI / Fase F"
+                />
+              </div>
+              <div>
+                <label for="passingScore" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  KKM / KKTP (Intervensi)
+                </label>
+                <input
+                  type="number"
+                  id="passingScore"
+                  min="0"
+                  max="100"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+              <div class="sm:col-span-2">
+                <label for="schoolLogoUrl" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  URL Logo Sekolah (Direct Link)
+                </label>
+                <div class="flex items-center gap-2.5">
+                  <input
+                    type="url"
+                    id="schoolLogoUrl"
+                    class="flex-1 min-w-0 px-3.5 py-2.5 rounded-xl text-sm font-mono bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  />
+                  <div class="w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-1 shrink-0 overflow-hidden">
+                    <img
+                      id="inputLogoPreview"
+                      src="https://iili.io/Ce8iqts.png"
+                      alt="Pratinjau Logo"
+                      class="w-full h-full object-contain rounded"
+                      onerror="this.onerror=null;this.src='https://placehold.co/64x64/e2e8f0/64748b?text=LOGO';"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label for="examToken" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Token Masuk Ujian
+                </label>
+                <input
+                  type="text"
+                  id="examToken"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm font-mono font-bold uppercase tracking-wider bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                  placeholder="MTK2026"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CARD 2: KOMPOSISI SOAL, WAKTU, MATHJAX & GAMBAR -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-400 font-bold text-sm flex items-center justify-center shrink-0">
+                2
+              </span>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Komposisi Soal, Waktu &amp; Rendering</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Default 25 soal (9 PG, 8 PGK/MCMA, 8 Benar-Salah), 60 menit, MathJax &amp; freeimage.host</p>
+              </div>
+            </div>
+            <span id="badgeTotalSoal" class="px-3 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">
+              Total: 25 Soal
+            </span>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label for="countPG" class="block text-[11px] font-bold text-indigo-700 dark:text-indigo-400 mb-1">
+                  PG Biasa
+                </label>
+                <input
+                  type="number"
+                  id="countPG"
+                  min="0"
+                  max="200"
+                  class="w-full px-2.5 py-1.5 rounded-lg text-base font-extrabold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label for="countPGK" class="block text-[11px] font-bold text-violet-700 dark:text-violet-400 mb-1">
+                  PGK (MCMA)
+                </label>
+                <input
+                  type="number"
+                  id="countPGK"
+                  min="0"
+                  max="200"
+                  class="w-full px-2.5 py-1.5 rounded-lg text-base font-extrabold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label for="countBS" class="block text-[11px] font-bold text-cyan-700 dark:text-cyan-400 mb-1">
+                  Benar / Salah
+                </label>
+                <input
+                  type="number"
+                  id="countBS"
+                  min="0"
+                  max="200"
+                  class="w-full px-2.5 py-1.5 rounded-lg text-base font-extrabold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                />
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <label for="durationMinutes" class="block text-[11px] font-bold text-amber-700 dark:text-amber-400 mb-1">
+                  Durasi (Menit)
+                </label>
+                <input
+                  type="number"
+                  id="durationMinutes"
+                  min="5"
+                  max="300"
+                  class="w-full px-2.5 py-1.5 rounded-lg text-base font-extrabold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
+
+            <!-- Scoring Mode for PGK + Randomize -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label for="pgkScoringMode" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Skema Penilaian PGK (MCMA)
+                </label>
+                <select
+                  id="pgkScoringMode"
+                  class="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                >
+                  <option value="exact">All-or-Nothing (Harus tepat semua kunci)</option>
+                  <option value="partial">Skor Parsial (Proporsional benar tanpa salah pilih)</option>
+                </select>
+              </div>
+              <div>
+                <label for="randomizeMode" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Pengacakan Soal
+                </label>
+                <select
+                  id="randomizeMode"
+                  class="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                >
+                  <option value="grouped">Acak per kelompok tipe (PG → PGK → BS)</option>
+                  <option value="all">Acak seluruh nomor soal &amp; opsi PG</option>
+                  <option value="ordered">Urut sesuai nomor di Sheet Soal</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Toggle Features -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-sky-400 transition">
+                <input type="checkbox" id="useMathJax" class="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500" />
+                <div class="text-xs">
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Aktifkan MathJax v3 (LaTeX)</div>
+                  <div class="text-slate-500 dark:text-slate-400">Render rumus Matematika, Fisika, Kimia otomatis (<code class="font-mono">$...$</code> &amp; <code class="font-mono">$$...$$</code>)</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-sky-400 transition">
+                <input type="checkbox" id="useFreeImage" class="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500" />
+                <div class="text-xs">
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Gambar freeimage.host + Zoom</div>
+                  <div class="text-slate-500 dark:text-slate-400">Tampilkan gambar responsif dari <code class="font-mono">iili.io</code> dengan modal perbesar (lightbox)</div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- CARD 3: DAFTAR NAMA SISWA -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 font-bold text-sm flex items-center justify-center shrink-0">
+                3
+              </span>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Daftar Nama Siswa (Auto-Inject)</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Masukkan 1 nama siswa per baris untuk dropdown login &amp; kunci 1x pengerjaan</p>
+              </div>
+            </div>
+            <span id="badgeStudentCount" class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+              0 Siswa
+            </span>
+          </div>
+
+          <div class="p-5 space-y-3">
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                id="btnFillSampleStudents"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition"
+              >
+                + Isi Contoh 10 Siswa
+              </button>
+              <button
+                type="button"
+                id="btnSortStudents"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition"
+              >
+                Urutkan A–Z
+              </button>
+              <button
+                type="button"
+                id="btnDedupeStudents"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-300 transition"
+              >
+                Hapus Duplikat
+              </button>
+              <button
+                type="button"
+                id="btnClearStudents"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50 transition ml-auto"
+              >
+                Bersihkan
+              </button>
+            </div>
+
+            <textarea
+              id="studentList"
+              rows="5"
+              placeholder="Tempel daftar nama siswa di sini (1 nama per baris), contoh:&#10;Ahmad Fauzi Pratama&#10;Aulia Rahmawati&#10;Budi Santoso"
+              class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition leading-relaxed"
+            ></textarea>
+          </div>
+        </section>
+
+        <!-- CARD 4: STRUKTUR DATABASE OTOMATIS & INTERVENSI -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 font-bold text-sm flex items-center justify-center shrink-0">
+              4
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Auto-Setup Database Google Sheets</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Struktur kolom otomatis dibuat melalui fungsi <code class="font-mono">setupDatabase()</code></p>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-3 text-xs">
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1.5">
+              <div class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300 font-mono text-[11px]">Sheet Peserta</span>
+                <span class="text-slate-500 dark:text-slate-400 font-normal">Urutan kolom hasil ujian &amp; intervensi</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">1. Nama</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">2. Waktu Mulai</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">3. Waktu Selesai</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">4. Durasi Pengerjaan (Menit)</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">5. Jumlah Skor</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">6. Jumlah Jawaban Benar</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">7. Jumlah Jawaban Salah</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">8. Analisis Jawaban Siswa</span>
+                <span class="px-2 py-0.5 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-medium">9. Intervensi Lanjutan</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div class="font-bold text-slate-800 dark:text-slate-100 mb-1">Sheet <code class="font-mono text-indigo-600 dark:text-indigo-400">Soal</code></div>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                  No, Tipe_Soal (PG/PGK/BS), Topik_KD, Pertanyaan, Link_Gambar, Opsi_A–E, Kunci_Jawaban, Bobot_Skor, Pembahasan.
+                </p>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div class="font-bold text-slate-800 dark:text-slate-100 mb-1">Sheet <code class="font-mono text-emerald-600 dark:text-emerald-400">Daftar_Siswa</code></div>
+                <p class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Nama_Siswa, Status (Belum/Selesai), Jumlah_Pelanggaran, Waktu_Submit. Mencegah peserta ujian ganda.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CARD 5: FITUR KEAMANAN ANTI-CURANG & CATATAN -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 font-bold text-sm flex items-center justify-center shrink-0">
+              5
+            </span>
+            <div>
+              <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Keamanan Anti-Curang &amp; Instruksi Khusus</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Proteksi berlapis di frontend &amp; backend Apps Script</p>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                <input type="checkbox" id="secFullscreen" class="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Fullscreen Lock</div>
+                  <div class="text-slate-500 dark:text-slate-400">Wajib layar penuh &amp; peringatan jika keluar</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                <input type="checkbox" id="secTabDetect" class="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Deteksi Pindah Tab / Split-Screen</div>
+                  <div class="text-slate-500 dark:text-slate-400">Auto-submit jika melampaui batas pelanggaran</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                <input type="checkbox" id="secAntiCopy" class="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Blokir Copy, Klik Kanan &amp; DevTools</div>
+                  <div class="text-slate-500 dark:text-slate-400">Cegah salin soal &amp; shortcut F12/Ctrl+C</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                <input type="checkbox" id="secOneAttempt" class="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Kunci 1x Pengerjaan (Server)</div>
+                  <div class="text-slate-500 dark:text-slate-400">Cek duplikat nama di server + LockService</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                <input type="checkbox" id="secWatermark" class="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Watermark Dinamis Anti-Screenshot</div>
+                  <div class="text-slate-500 dark:text-slate-400">Nama siswa &amp; waktu transparan di latar soal</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer">
+                <input type="checkbox" id="secAutoSave" class="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Auto-Save Lokal Anti Putus Sinyal</div>
+                  <div class="text-slate-500 dark:text-slate-400">Pulihkan jawaban &amp; timer saat refresh/HP mati</div>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-2.5 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 cursor-pointer sm:col-span-2">
+                <input type="checkbox" id="secServerScoring" class="mt-0.5 w-4 h-4 rounded text-amber-600 focus:ring-amber-500" />
+                <div>
+                  <div class="font-bold text-slate-800 dark:text-slate-100">Zero-Leak Kunci Jawaban &amp; Penilaian 100% di Server</div>
+                  <div class="text-slate-500 dark:text-slate-400">API tidak pernah mengirim kolom Kunci_Jawaban ke browser; skor, analisis &amp; intervensi dihitung murni di Apps Script</div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Max Violation Limit -->
+            <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/50">
+              <div class="text-xs">
+                <div class="font-bold text-amber-900 dark:text-amber-300">Batas Toleransi Pelanggaran Tab/Layar</div>
+                <div class="text-amber-700/80 dark:text-amber-400/80">Ujian otomatis terkirim setelah mencapai batas ini</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input
+                  type="number"
+                  id="maxViolations"
+                  min="1"
+                  max="10"
+                  class="w-20 px-3 py-1.5 rounded-lg text-sm font-extrabold text-center bg-white dark:bg-slate-900 border border-amber-300 dark:border-amber-700 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+                <span class="text-xs font-semibold text-amber-900 dark:text-amber-300">kali</span>
+              </div>
+            </div>
+
+            <!-- Extra Custom Notes -->
+            <div>
+              <label for="extraNotes" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Catatan Tambahan / Instruksi Khusus (Opsional)
+              </label>
+              <textarea
+                id="extraNotes"
+                rows="2"
+                placeholder="Contoh: Sertakan tombol ekspor PDF hasil nilai di menu guru, atau gunakan bahasa pengantar formal..."
+                class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+              ></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- CARD 6: BANK SOAL MANUAL & LAMPIRAN FILE SOAL -->
+        <section id="cardBankSoalManual" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 font-bold text-sm flex items-center justify-center shrink-0">
+                6
+              </span>
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-white text-sm sm:text-base">Input Soal Manual &amp; Lampiran File Soal</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Masukkan butir soal beserta jenis &amp; kunci jawaban benar, atau lampirkan file soal siap jadi</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span id="manualQuestionCountBadge" class="px-2.5 py-1 rounded-full text-xs font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
+                0 Soal
+              </span>
+              <span id="attachedFileCountBadge" class="hidden px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">
+                0 File
+              </span>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-5">
+            <!-- Mode Switcher: Manual vs Lampirkan File -->
+            <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+              <button
+                type="button"
+                data-qmode="manual"
+                class="qmode-tab py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition bg-white dark:bg-slate-900 text-violet-700 dark:text-violet-300 shadow-sm"
+              >
+                Input Soal Manual
+              </button>
+              <button
+                type="button"
+                data-qmode="file"
+                class="qmode-tab py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+              >
+                Lampirkan File Soal
+              </button>
+            </div>
+
+            <!-- PANEL A: FORM INPUT SOAL MANUAL -->
+            <div id="panelManualInput" class="space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2 bg-violet-50/70 dark:bg-violet-950/30 border border-violet-200/70 dark:border-violet-800/50 rounded-xl px-3.5 py-2.5">
+                <span id="formEditIndicator" class="text-xs font-semibold text-violet-800 dark:text-violet-300">
+                  Mode: Tambah Soal Baru
+                </span>
+                <button
+                  type="button"
+                  id="btnLoadSampleQuestions"
+                  class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 text-violet-700 dark:text-violet-300 border border-violet-200 dark:border-violet-700 hover:bg-violet-100 dark:hover:bg-violet-900/50 transition"
+                >
+                  + Isi Contoh 3 Tipe Soal
+                </button>
+              </div>
+
+              <!-- Row 1: Jenis Soal, Topik/KD, Bobot -->
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div class="sm:col-span-5">
+                  <label for="qType" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Jenis Soal
+                  </label>
+                  <select
+                    id="qType"
+                    class="w-full px-3 py-2.5 rounded-xl text-sm font-semibold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  >
+                    <option value="PG">Pilihan Ganda (PG) — 1 Benar</option>
+                    <option value="PGK">PGK / MCMA — Multi Benar</option>
+                    <option value="BS">Benar / Salah (BS)</option>
+                  </select>
+                </div>
+
+                <div class="sm:col-span-5">
+                  <label for="qTopic" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Topik / KD (Untuk Analisis)
+                  </label>
+                  <input
+                    type="text"
+                    id="qTopic"
+                    placeholder="Contoh: Turunan Fungsi"
+                    class="w-full px-3 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                </div>
+
+                <div class="sm:col-span-2">
+                  <label for="qWeight" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Bobot
+                  </label>
+                  <input
+                    type="number"
+                    id="qWeight"
+                    min="1"
+                    max="100"
+                    value="4"
+                    class="w-full px-3 py-2.5 rounded-xl text-sm font-bold bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                </div>
+              </div>
+
+              <!-- Row 2: Pertanyaan + Quick LaTeX Chips -->
+              <div>
+                <div class="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
+                  <label for="qText" class="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Pertanyaan / Pernyataan Soal
+                  </label>
+                  <div class="flex flex-wrap items-center gap-1">
+                    <button type="button" data-latex="$x^2$" class="latex-chip px-2 py-0.5 rounded-md text-[10px] font-mono bg-slate-100 hover:bg-violet-100 text-slate-600 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-violet-900/50 transition">+ Pangkat</button>
+                    <button type="button" data-latex="$\frac{a}{b}$" class="latex-chip px-2 py-0.5 rounded-md text-[10px] font-mono bg-slate-100 hover:bg-violet-100 text-slate-600 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-violet-900/50 transition">+ Pecahan</button>
+                    <button type="button" data-latex="$\sqrt{x}$" class="latex-chip px-2 py-0.5 rounded-md text-[10px] font-mono bg-slate-100 hover:bg-violet-100 text-slate-600 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-violet-900/50 transition">+ Akar</button>
+                    <button type="button" data-latex="$\int_{a}^{b} f(x)\,dx$" class="latex-chip px-2 py-0.5 rounded-md text-[10px] font-mono bg-slate-100 hover:bg-violet-100 text-slate-600 hover:text-violet-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-violet-900/50 transition">+ Integral</button>
+                  </div>
+                </div>
+                <textarea
+                  id="qText"
+                  rows="3"
+                  placeholder="Tuliskan teks pertanyaan soal di sini (mendukung LaTeX MathJax, misal: $f(x) = x^2 + 3x$)..."
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500 transition"
+                ></textarea>
+              </div>
+
+              <!-- Row 3: Link Gambar freeimage.host -->
+              <div>
+                <label for="qImage" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Link Gambar freeimage.host <span class="text-slate-400 font-normal">(Opsional)</span>
+                </label>
+                <div class="flex items-center gap-2.5">
+                  <input
+                    type="url"
+                    id="qImage"
+                    placeholder="https://iili.io/contoh-gambar.png"
+                    class="flex-1 min-w-0 px-3.5 py-2.5 rounded-xl text-sm font-mono bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                  <div id="qImagePreviewWrap" class="hidden w-11 h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-1 shrink-0 overflow-hidden">
+                    <img
+                      id="qImagePreview"
+                      src=""
+                      alt="Preview Gambar Soal"
+                      class="w-full h-full object-contain rounded"
+                      onerror="this.onerror=null;this.src='https://placehold.co/60x60/e2e8f0/64748b?text=IMG';"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 4: Opsi Jawaban & Penentuan Kunci Jawaban Benar -->
+              <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/80 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <span class="text-xs font-bold text-slate-800 dark:text-slate-100">
+                    Pilihan Jawaban &amp; Kunci Benar
+                  </span>
+                  <span id="qAnswerHint" class="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
+                    Pilih 1 opsi sebagai kunci jawaban benar
+                  </span>
+                </div>
+
+                <!-- Dynamic Container for PG / PGK Options (A-E) -->
+                <div id="qOptionsPGContainer" class="space-y-2.5">
+                  <!-- Option A -->
+                  <div class="q-opt-row flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 transition" data-opt="A">
+                    <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-pointer shrink-0 select-none">
+                      <input type="radio" name="qCorrectPG" value="A" class="q-correct-pg w-4 h-4 text-emerald-600 focus:ring-emerald-500" />
+                      <input type="checkbox" value="A" class="q-correct-pgk hidden w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+                      <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">A</span>
+                    </label>
+                    <input type="text" id="qOptA" placeholder="Teks pilihan A..." class="flex-1 min-w-0 px-2.5 py-1.5 text-sm bg-transparent focus:outline-none text-slate-800 dark:text-slate-100" />
+                  </div>
+
+                  <!-- Option B -->
+                  <div class="q-opt-row flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 transition" data-opt="B">
+                    <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-pointer shrink-0 select-none">
+                      <input type="radio" name="qCorrectPG" value="B" class="q-correct-pg w-4 h-4 text-emerald-600 focus:ring-emerald-500" />
+                      <input type="checkbox" value="B" class="q-correct-pgk hidden w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+                      <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">B</span>
+                    </label>
+                    <input type="text" id="qOptB" placeholder="Teks pilihan B..." class="flex-1 min-w-0 px-2.5 py-1.5 text-sm bg-transparent focus:outline-none text-slate-800 dark:text-slate-100" />
+                  </div>
+
+                  <!-- Option C -->
+                  <div class="q-opt-row flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 transition" data-opt="C">
+                    <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-pointer shrink-0 select-none">
+                      <input type="radio" name="qCorrectPG" value="C" class="q-correct-pg w-4 h-4 text-emerald-600 focus:ring-emerald-500" />
+                      <input type="checkbox" value="C" class="q-correct-pgk hidden w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+                      <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">C</span>
+                    </label>
+                    <input type="text" id="qOptC" placeholder="Teks pilihan C..." class="flex-1 min-w-0 px-2.5 py-1.5 text-sm bg-transparent focus:outline-none text-slate-800 dark:text-slate-100" />
+                  </div>
+
+                  <!-- Option D -->
+                  <div class="q-opt-row flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 transition" data-opt="D">
+                    <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-pointer shrink-0 select-none">
+                      <input type="radio" name="qCorrectPG" value="D" class="q-correct-pg w-4 h-4 text-emerald-600 focus:ring-emerald-500" />
+                      <input type="checkbox" value="D" class="q-correct-pgk hidden w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+                      <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">D</span>
+                    </label>
+                    <input type="text" id="qOptD" placeholder="Teks pilihan D..." class="flex-1 min-w-0 px-2.5 py-1.5 text-sm bg-transparent focus:outline-none text-slate-800 dark:text-slate-100" />
+                  </div>
+
+                  <!-- Option E -->
+                  <div class="q-opt-row flex items-center gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 transition" data-opt="E">
+                    <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 cursor-pointer shrink-0 select-none">
+                      <input type="radio" name="qCorrectPG" value="E" class="q-correct-pg w-4 h-4 text-emerald-600 focus:ring-emerald-500" />
+                      <input type="checkbox" value="E" class="q-correct-pgk hidden w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500" />
+                      <span class="text-xs font-extrabold text-slate-700 dark:text-slate-200">E</span>
+                    </label>
+                    <input type="text" id="qOptE" placeholder="Teks pilihan E (Opsional)..." class="flex-1 min-w-0 px-2.5 py-1.5 text-sm bg-transparent focus:outline-none text-slate-800 dark:text-slate-100" />
+                  </div>
+                </div>
+
+                <!-- Dynamic Container for Benar / Salah (BS) -->
+                <div id="qOptionsBSContainer" class="hidden grid-cols-2 gap-3">
+                  <label class="bs-choice-card flex items-center justify-center gap-2.5 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer hover:border-emerald-400 transition">
+                    <input type="radio" name="qCorrectBS" value="Benar" class="q-correct-bs w-4 h-4 text-emerald-600 focus:ring-emerald-500" />
+                    <span class="text-sm font-extrabold text-emerald-700 dark:text-emerald-400">BENAR</span>
+                  </label>
+                  <label class="bs-choice-card flex items-center justify-center gap-2.5 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer hover:border-rose-400 transition">
+                    <input type="radio" name="qCorrectBS" value="Salah" class="q-correct-bs w-4 h-4 text-rose-600 focus:ring-rose-500" />
+                    <span class="text-sm font-extrabold text-rose-700 dark:text-rose-400">SALAH</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Row 5: Pembahasan (Opsional) -->
+              <div>
+                <label for="qExplanation" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                  Pembahasan Singkat <span class="text-slate-400 font-normal">(Opsional, tersimpan di Sheet Soal)</span>
+                </label>
+                <input
+                  type="text"
+                  id="qExplanation"
+                  placeholder="Contoh: Menggunakan aturan pangkat d/dx(x^n) = nx^(n-1)..."
+                  class="w-full px-3.5 py-2.5 rounded-xl text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  id="btnSaveQuestion"
+                  class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-600/20 transition"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span id="btnSaveQuestionLabel">Tambah ke Daftar Soal</span>
+                </button>
+
+                <button
+                  type="button"
+                  id="btnCancelEditQuestion"
+                  class="hidden px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition"
+                >
+                  Batal Edit
+                </button>
+              </div>
+            </div>
+
+            <!-- PANEL B: LAMPIRKAN FILE SOAL SIAP PAKAI -->
+            <div id="panelFileAttach" class="hidden space-y-4">
+              <!-- Dropzone -->
+              <div
+                id="questionFileDropzone"
+                class="relative rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-violet-500 dark:hover:border-violet-400 bg-slate-50/70 dark:bg-slate-800/40 p-6 text-center transition cursor-pointer"
+              >
+                <input
+                  type="file"
+                  id="questionFileInput"
+                  multiple
+                  accept=".csv,.tsv,.json,.txt,.md,.pdf,.doc,.docx,.xlsx,.xls"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400 flex items-center justify-center mb-3">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                </div>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-100">
+                  Klik atau seret file soal yang sudah jadi ke sini
+                </p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
+                  <strong>Auto-Impor Daftar Soal:</strong> <code class="font-mono">.CSV</code>, <code class="font-mono">.TSV</code>, <code class="font-mono">.JSON</code><br />
+                  <strong>Sematkan Teks ke Prompt:</strong> <code class="font-mono">.TXT</code>, <code class="font-mono">.MD</code><br />
+                  <strong>Lampiran Dokumen Siap Jadi:</strong> <code class="font-mono">.PDF</code>, <code class="font-mono">.DOCX</code>, <code class="font-mono">.XLSX</code>
+                </p>
+              </div>
+
+              <!-- Template & Export Helpers -->
+              <div class="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  id="btnDownloadCsvTemplate"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Unduh Template CSV
+                </button>
+
+                <button
+                  type="button"
+                  id="btnExportQuestionsCsv"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-sky-50 text-sky-700 hover:bg-sky-100 dark:bg-sky-950/60 dark:text-sky-300 border border-sky-200 dark:border-sky-800 transition"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Ekspor Soal ke CSV
+                </button>
+
+                <button
+                  type="button"
+                  id="btnExportQuestionsJson"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg>
+                  Ekspor ke JSON
+                </button>
+              </div>
+
+              <!-- Attached Files List -->
+              <div id="attachedFilesWrapper" class="hidden space-y-2">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200">File Soal Terlampir:</h4>
+                  <button type="button" id="btnClearAttachedFiles" class="text-[11px] font-semibold text-rose-600 hover:underline dark:text-rose-400">
+                    Hapus Semua Lampiran
+                  </button>
+                </div>
+                <div id="attachedFilesList" class="space-y-2"></div>
+              </div>
+            </div>
+
+            <!-- DAFTAR SOAL MANUAL YANG TELAH MASUK -->
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="space-y-0.5">
+                  <h4 class="text-xs font-bold text-slate-800 dark:text-slate-100">
+                    Daftar Soal Tersimpan
+                  </h4>
+                  <p id="manualQuestionSummary" class="text-[11px] text-slate-500 dark:text-slate-400">
+                    PG: 0 • PGK: 0 • BS: 0
+                  </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <button
+                    type="button"
+                    id="btnSyncCountsFromManual"
+                    class="hidden px-2.5 py-1.5 rounded-lg text-[11px] font-semibold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 transition"
+                    title="Sesuaikan angka PG, PGK, dan BS di Kartu 2 mengikuti daftar soal manual"
+                  >
+                    Sinkronkan Komposisi
+                  </button>
+                  <button
+                    type="button"
+                    id="btnClearAllManualQuestions"
+                    class="hidden px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/50 transition"
+                  >
+                    Hapus Semua Soal
+                  </button>
+                </div>
+              </div>
+
+              <div id="manualQuestionsList" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+                <div class="text-center py-6 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
+                  Belum ada soal manual dimasukkan. Anda dapat menambahkan soal satu per satu di atas atau mengunggah file soal siap pakai.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ==================== RIGHT COLUMN: LIVE PROMPT STUDIO (5 COLS) ==================== -->
+      <aside class="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg shadow-slate-200/50 dark:shadow-none overflow-hidden flex flex-col">
+          <!-- Studio Header -->
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+            <div>
+              <h3 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                Live Prompt Output
+              </h3>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                Otomatis diperbarui sesuai konfigurasi, soal manual &amp; lampiran
+              </p>
+            </div>
+            <button
+              type="button"
+              id="btnExpandPrompt"
+              class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition"
+              title="Perbesar Pratinjau Prompt"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- 4 Prompt Mode Tabs -->
+          <div class="px-4 pt-3 pb-2 bg-slate-50/70 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-800">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+              <button type="button" data-tab="master" class="prompt-tab px-2.5 py-2 rounded-xl text-[11px] font-bold transition">
+                Master Lengkap
+              </button>
+              <button type="button" data-tab="backend" class="prompt-tab px-2.5 py-2 rounded-xl text-[11px] font-bold transition">
+                1. Backend GAS
+              </button>
+              <button type="button" data-tab="frontend" class="prompt-tab px-2.5 py-2 rounded-xl text-[11px] font-bold transition">
+                2. Frontend Web
+              </button>
+              <button type="button" data-tab="questions" class="prompt-tab px-2.5 py-2 rounded-xl text-[11px] font-bold transition">
+                3. Bank Soal
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Stats Strip -->
+          <div class="px-4 py-2 bg-slate-100/70 dark:bg-slate-800/50 border-b border-slate-200/70 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-400">
+            <div class="flex items-center gap-3">
+              <span id="statCharCount" class="font-mono font-semibold">0 karakter</span>
+              <span>•</span>
+              <span id="statTokenEstimate" class="font-mono">~0 token</span>
+            </div>
+            <span id="statAttachmentIndicator" class="hidden px-2 py-0.5 rounded-full text-[10px] font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/60 dark:text-violet-300">
+              Data Soal Aktif
+            </span>
+          </div>
+
+          <!-- Prompt Code Viewer -->
+          <div class="p-4">
+            <textarea
+              id="promptOutput"
+              readonly
+              rows="18"
+              class="w-full h-[380px] sm:h-[440px] p-4 rounded-xl text-xs font-mono leading-relaxed bg-slate-900 text-slate-100 border border-slate-800 focus:outline-none resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Primary Action Buttons -->
+          <div class="px-4 pb-4 flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              id="btnCopyPrompt"
+              class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white shadow-md shadow-indigo-600/25 transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Salin Prompt
+            </button>
+
+            <button
+              type="button"
+              id="btnDownloadPrompt"
+              class="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Unduh .md
+            </button>
+          </div>
+        </div>
+
+        <!-- Tip Card -->
+        <div class="rounded-2xl bg-indigo-50/80 dark:bg-indigo-950/30 border border-indigo-200/70 dark:border-indigo-900/70 p-4 text-xs text-indigo-900 dark:text-indigo-200 space-y-1.5">
+          <div class="font-bold flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            Tips Hasil Kode Terbaik
+          </div>
+          <p class="leading-relaxed text-indigo-800/90 dark:text-indigo-300/90">
+            Jika Anda melampirkan file <strong>PDF / DOCX / XLSX</strong>, salin prompt lalu unggah file tersebut bersamaan di chat AI. Untuk hasil kode yang utuh tanpa terpotong, jalankan secara bertahap: <strong>1. Backend GAS</strong> → <strong>2. Frontend Web</strong> → <strong>3. Bank Soal</strong>.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-5 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+      <span>CBT Prompt Studio — Dirancang untuk GitHub Pages &amp; Google Apps Script</span>
+      <span>Auto-save aktif di penyimpanan lokal browser Anda</span>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL: PANDUAN DEPLOY ==================== -->
+  <div id="deployModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Panduan Deploy CBT (Apps Script + GitHub)</h3>
+        <button type="button" data-close-modal="deployModal" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-1">
+          <div class="font-bold text-slate-900 dark:text-white">Langkah 1 — Buat Google Spreadsheet &amp; Apps Script</div>
+          <p>Buka Google Sheets baru → klik menu <strong>Ekstensi &gt; Apps Script</strong> → tempel kode <code class="font-mono">Code.gs</code> hasil dari prompt AI → klik Simpan.</p>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-1">
+          <div class="font-bold text-slate-900 dark:text-white">Langkah 2 — Jalankan Setup Database Otomatis</div>
+          <p>Pilih fungsi <code class="font-mono font-bold text-indigo-600 dark:text-indigo-400">setupDatabase</code> di toolbar Apps Script lalu klik <strong>Jalankan (Run)</strong> dan berikan izin akses. Sheet <code class="font-mono">Soal</code>, <code class="font-mono">Daftar_Siswa</code>, dan <code class="font-mono">Peserta</code> beserta soal manual Anda akan terbentuk otomatis.</p>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-1">
+          <div class="font-bold text-slate-900 dark:text-white">Langkah 3 — Deploy Backend sebagai Web App</div>
+          <p>Klik <strong>Terapkan (Deploy) &gt; Deployment Baru &gt; Aplikasi Web</strong>. Atur <em>Jalankan sebagai</em>: <strong>Saya</strong>, dan <em>Yang memiliki akses</em>: <strong>Siapa saja (Anyone)</strong>. Salin URL Web App (<code class="font-mono">.../exec</code>).</p>
+        </div>
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-1">
+          <div class="font-bold text-slate-900 dark:text-white">Langkah 4 — Hosting Frontend di GitHub Pages</div>
+          <p>Tempel URL <code class="font-mono">.../exec</code> ke variabel <code class="font-mono">API_URL</code> di file <code class="font-mono">index.html</code>. Unggah ke repositori GitHub Anda → buka <strong>Settings &gt; Pages</strong> → pilih branch <code class="font-mono">main</code> → simpan. Aplikasi CBT siap diakses dari HP, tablet, dan laptop!</p>
+        </div>
+      </div>
+      <div class="px-5 py-3.5 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+        <button type="button" data-close-modal="deployModal" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: EXPANDED PROMPT PREVIEW ==================== -->
+  <div id="expandPromptModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 backdrop-blur-sm p-3 sm:p-6">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-5xl w-full h-[88vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
+        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">Pratinjau Penuh Prompt</h3>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btnCopyPromptModal" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition">
+            Salin Prompt
+          </button>
+          <button type="button" data-close-modal="expandPromptModal" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="p-4 flex-1 overflow-hidden">
+        <textarea
+          id="promptOutputModal"
+          readonly
+          class="w-full h-full p-4 rounded-xl text-xs sm:text-sm font-mono leading-relaxed bg-slate-900 text-slate-100 border border-slate-800 focus:outline-none resize-none"
+        ></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL: KONFIRMASI RESET ==================== -->
+  <div id="resetModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-sm w-full p-5 shadow-2xl space-y-4">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="font-extrabold text-slate-900 dark:text-white text-sm">Reset Semua Pengaturan?</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Seluruh konfigurasi, daftar siswa, soal manual, dan lampiran file akan dikembalikan ke pengaturan awal (25 soal: 9 PG, 8 PGK, 8 BS, 60 menit).
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 pt-1">
+        <button type="button" data-close-modal="resetModal" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">
+          Batal
+        </button>
+        <button type="button" id="btnConfirmReset" class="px-4 py-2 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition">
+          Ya, Reset Semua
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATION CONTAINER ==================== -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none"></div>
+
+  <!-- ==================== APPLICATION LOGIC ==================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_KEY = 'cbt_prompt_studio_state_v2';
+      const FENCE = '```';
+
+      const DEFAULT_STATE = {
+        schoolName: 'SMA Negeri 1 Nusantara',
+        examTitle: 'Penilaian Sumatif Akhir Semester',
+        subjectName: 'Matematika',
+        gradeLevel: 'Kelas XI / Fase F',
+        passingScore: 75,
+        schoolLogoUrl: 'https://iili.io/Ce8iqts.png',
+        examToken: 'MTK2026',
+        countPG: 9,
+        countPGK: 8,
+        countBS: 8,
+        durationMinutes: 60,
+        pgkScoringMode: 'exact',
+        randomizeMode: 'grouped',
+        useMathJax: true,
+        useFreeImage: true,
+        studentList: '',
+        secFullscreen: true,
+        secTabDetect: true,
+        secAntiCopy: true,
+        secOneAttempt: true,
+        secWatermark: true,
+        secAutoSave: true,
+        secServerScoring: true,
+        maxViolations: 3,
+        extraNotes: '',
+        activeTab: 'master',
+        manualQuestions: [],
+        attachedFiles: [],
+      };
+
+      const SAMPLE_STUDENTS = [
+        'Ahmad Fauzi Pratama',
+        'Aulia Rahmawati',
+        'Bagas Aditya Nugroho',
+        'Citra Dewi Lestari',
+        'Dimas Saputra',
+        'Fadhila Nurul Hidayah',
+        'Hendra Wijaya',
+        'Nadia Kusuma Putri',
+        'Rafi Akbar Ramadhan',
+        'Siti Aminah Azzahra',
+      ];
+
+      const SAMPLE_QUESTIONS = [
+        {
+          id: 'sample_pg_1',
+          type: 'PG',
+          topic: 'Turunan Fungsi Aljabar',
+          question: 'Turunan pertama dari fungsi $f(x) = 3x^2 - 5x + 7$ adalah ...',
+          imageUrl: '',
+          options: {
+            A: '$6x - 5$',
+            B: '$3x - 5$',
+            C: '$6x + 5$',
+            D: '$6x^2 - 5$',
+            E: '$3x^2 - 5$',
+          },
+          answer: 'A',
+          weight: 4,
+          explanation: "Dengan aturan pangkat, $f'(x) = 2(3)x^{2-1} - 5 = 6x - 5$.",
+        },
+        {
+          id: 'sample_pgk_1',
+          type: 'PGK',
+          topic: 'Persamaan Kuadrat',
+          question: 'Diketahui persamaan kuadrat $x^2 - 5x + 6 = 0$. Pilih semua pernyataan yang BENAR mengenai persamaan tersebut!',
+          imageUrl: '',
+          options: {
+            A: 'Salah satu akarnya adalah $x = 2$',
+            B: 'Hasil kali akar-akarnya adalah $5$',
+            C: 'Jumlah kedua akarnya adalah $5$',
+            D: 'Nilai diskriminannya $D = 1$',
+            E: 'Memiliki akar kembar',
+          },
+          answer: 'A,C,D',
+          weight: 4,
+          explanation: 'Faktor $(x-2)(x-3)=0$, sehingga akar $2$ dan $3$, jumlah $=5$, dan $D=(-5)^2-4(1)(6)=1$.',
+        },
+        {
+          id: 'sample_bs_1',
+          type: 'BS',
+          topic: 'Trigonometri Dasar',
+          question: 'Untuk setiap sudut $\\theta$, berlaku identitas trigonometri $\\sin^2(\\theta) + \\cos^2(\\theta) = 1$.',
+          imageUrl: '',
+          options: { A: 'Benar', B: 'Salah', C: '', D: '', E: '' },
+          answer: 'Benar',
+          weight: 4,
+          explanation: 'Identitas Pythagoras trigonometri selalu bernilai 1 untuk semua bilangan real $\\theta$.',
+        },
+      ];
+
+      let state = loadState();
+      let editingQuestionId = null;
+      let confirmClearQuestionsArmed = false;
+
+      // ==================== DOM REFERENCES ====================
+      const el = {
+        navSchoolLogo: document.getElementById('navSchoolLogo'),
+        bannerSchoolLogo: document.getElementById('bannerSchoolLogo'),
+        inputLogoPreview: document.getElementById('inputLogoPreview'),
+        bannerTitlePreview: document.getElementById('bannerTitlePreview'),
+        bannerTotalSoal: document.getElementById('bannerTotalSoal'),
+        bannerSoalManual: document.getElementById('bannerSoalManual'),
+        bannerDurasi: document.getElementById('bannerDurasi'),
+        bannerTotalSiswa: document.getElementById('bannerTotalSiswa'),
+        badgeTotalSoal: document.getElementById('badgeTotalSoal'),
+        badgeStudentCount: document.getElementById('badgeStudentCount'),
+
+        // Card 1-5 Inputs
+        schoolName: document.getElementById('schoolName'),
+        examTitle: document.getElementById('examTitle'),
+        subjectName: document.getElementById('subjectName'),
+        gradeLevel: document.getElementById('gradeLevel'),
+        passingScore: document.getElementById('passingScore'),
+        schoolLogoUrl: document.getElementById('schoolLogoUrl'),
+        examToken: document.getElementById('examToken'),
+        countPG: document.getElementById('countPG'),
+        countPGK: document.getElementById('countPGK'),
+        countBS: document.getElementById('countBS'),
+        durationMinutes: document.getElementById('durationMinutes'),
+        pgkScoringMode: document.getElementById('pgkScoringMode'),
+        randomizeMode: document.getElementById('randomizeMode'),
+        useMathJax: document.getElementById('useMathJax'),
+        useFreeImage: document.getElementById('useFreeImage'),
+        studentList: document.getElementById('studentList'),
+        btnFillSampleStudents: document.getElementById('btnFillSampleStudents'),
+        btnSortStudents: document.getElementById('btnSortStudents'),
+        btnDedupeStudents: document.getElementById('btnDedupeStudents'),
+        btnClearStudents: document.getElementById('btnClearStudents'),
+        secFullscreen: document.getElementById('secFullscreen'),
+        secTabDetect: document.getElementById('secTabDetect'),
+        secAntiCopy: document.getElementById('secAntiCopy'),
+        secOneAttempt: document.getElementById('secOneAttempt'),
+        secWatermark: document.getElementById('secWatermark'),
+        secAutoSave: document.getElementById('secAutoSave'),
+        secServerScoring: document.getElementById('secServerScoring'),
+        maxViolations: document.getElementById('maxViolations'),
+        extraNotes: document.getElementById('extraNotes'),
+
+        // Card 6: Manual Questions & File Attachment
+        manualQuestionCountBadge: document.getElementById('manualQuestionCountBadge'),
+        attachedFileCountBadge: document.getElementById('attachedFileCountBadge'),
+        panelManualInput: document.getElementById('panelManualInput'),
+        panelFileAttach: document.getElementById('panelFileAttach'),
+        formEditIndicator: document.getElementById('formEditIndicator'),
+        btnLoadSampleQuestions: document.getElementById('btnLoadSampleQuestions'),
+        qType: document.getElementById('qType'),
+        qTopic: document.getElementById('qTopic'),
+        qWeight: document.getElementById('qWeight'),
+        qText: document.getElementById('qText'),
+        qImage: document.getElementById('qImage'),
+        qImagePreviewWrap: document.getElementById('qImagePreviewWrap'),
+        qImagePreview: document.getElementById('qImagePreview'),
+        qAnswerHint: document.getElementById('qAnswerHint'),
+        qOptionsPGContainer: document.getElementById('qOptionsPGContainer'),
+        qOptionsBSContainer: document.getElementById('qOptionsBSContainer'),
+        qOptA: document.getElementById('qOptA'),
+        qOptB: document.getElementById('qOptB'),
+        qOptC: document.getElementById('qOptC'),
+        qOptD: document.getElementById('qOptD'),
+        qOptE: document.getElementById('qOptE'),
+        qExplanation: document.getElementById('qExplanation'),
+        btnSaveQuestion: document.getElementById('btnSaveQuestion'),
+        btnSaveQuestionLabel: document.getElementById('btnSaveQuestionLabel'),
+        btnCancelEditQuestion: document.getElementById('btnCancelEditQuestion'),
+        questionFileDropzone: document.getElementById('questionFileDropzone'),
+        questionFileInput: document.getElementById('questionFileInput'),
+        btnDownloadCsvTemplate: document.getElementById('btnDownloadCsvTemplate'),
+        btnExportQuestionsCsv: document.getElementById('btnExportQuestionsCsv'),
+        btnExportQuestionsJson: document.getElementById('btnExportQuestionsJson'),
+        attachedFilesWrapper: document.getElementById('attachedFilesWrapper'),
+        attachedFilesList: document.getElementById('attachedFilesList'),
+        btnClearAttachedFiles: document.getElementById('btnClearAttachedFiles'),
+        manualQuestionSummary: document.getElementById('manualQuestionSummary'),
+        btnSyncCountsFromManual: document.getElementById('btnSyncCountsFromManual'),
+        btnClearAllManualQuestions: document.getElementById('btnClearAllManualQuestions'),
+        manualQuestionsList: document.getElementById('manualQuestionsList'),
+
+        // Prompt Studio & Modals
+        promptOutput: document.getElementById('promptOutput'),
+        promptOutputModal: document.getElementById('promptOutputModal'),
+        statCharCount: document.getElementById('statCharCount'),
+        statTokenEstimate: document.getElementById('statTokenEstimate'),
+        statAttachmentIndicator: document.getElementById('statAttachmentIndicator'),
+        btnCopyPrompt: document.getElementById('btnCopyPrompt'),
+        btnCopyPromptModal: document.getElementById('btnCopyPromptModal'),
+        btnDownloadPrompt: document.getElementById('btnDownloadPrompt'),
+        btnExpandPrompt: document.getElementById('btnExpandPrompt'),
+        btnOpenDeployGuide: document.getElementById('btnOpenDeployGuide'),
+        btnOpenReset: document.getElementById('btnOpenReset'),
+        btnConfirmReset: document.getElementById('btnConfirmReset'),
+        btnThemeToggle: document.getElementById('btnThemeToggle'),
+        toastContainer: document.getElementById('toastContainer'),
+      };
+
+      // ==================== UTILITIES & STORAGE ====================
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return { ...DEFAULT_STATE, manualQuestions: [], attachedFiles: [] };
+          const parsed = JSON.parse(raw);
+          return {
+            ...DEFAULT_STATE,
+            ...parsed,
+            manualQuestions: Array.isArray(parsed.manualQuestions) ? parsed.manualQuestions : [],
+            attachedFiles: Array.isArray(parsed.attachedFiles) ? parsed.attachedFiles : [],
+          };
+        } catch (err) {
+          return { ...DEFAULT_STATE, manualQuestions: [], attachedFiles: [] };
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          showToast('Penyimpanan browser penuh. Pertimbangkan mengekspor soal ke JSON/CSV.', 'warning');
+        }
+      }
+
+      function safeNum(val, fallback) {
+        const n = parseInt(val, 10);
+        return isNaN(n) || n < 0 ? fallback : n;
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatBytes(bytes) {
+        if (!bytes || bytes < 1024) return `${bytes || 0} B`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+      }
+
+      function getParsedStudents() {
+        return String(state.studentList || '')
+          .split(/\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+
+      function showToast(message, type = 'success') {
+        const colors = {
+          success: 'bg-emerald-600 text-white',
+          info: 'bg-indigo-600 text-white',
+          warning: 'bg-amber-600 text-white',
+          error: 'bg-rose-600 text-white',
+        };
+        const toast = document.createElement('div');
+        toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-lg text-xs font-semibold flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+        toast.textContent = message;
+        el.toastContainer.appendChild(toast);
+
+        requestAnimationFrame(() => {
+          toast.classList.remove('translate-y-2', 'opacity-0');
+        });
+
+        setTimeout(() => {
+          toast.classList.add('translate-y-2', 'opacity-0');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      function copyTextToClipboard(text) {
+        try {
+          const temp = document.createElement('textarea');
+          temp.value = text;
+          temp.setAttribute('readonly', '');
+          temp.style.position = 'fixed';
+          temp.style.left = '-9999px';
+          document.body.appendChild(temp);
+          temp.select();
+          temp.setSelectionRange(0, temp.value.length);
+          const ok = document.execCommand('copy');
+          document.body.removeChild(temp);
+          if (ok) {
+            showToast('Prompt berhasil disalin ke clipboard!', 'success');
+          } else {
+            showToast('Gagal menyalin otomatis. Pilih teks lalu tekan Ctrl+C.', 'warning');
+          }
+        } catch (err) {
+          showToast('Gagal menyalin otomatis. Pilih teks lalu tekan Ctrl+C.', 'warning');
+        }
+      }
+
+      function triggerDownload(filename, content, mimeType) {
+        try {
+          const blob = new Blob([content], { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          showToast('Gagal mengunduh file.', 'error');
+        }
+      }
+
+      function openModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+
+      function closeModal(id) {
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+
+      // ==================== CSV / JSON PARSING FOR FILE IMPORT ====================
+      function normalizeQuestionType(raw) {
+        const v = String(raw || '').trim().toUpperCase();
+        if (v.includes('PGK') || v.includes('MCMA') || v.includes('KOMPLEKS')) return 'PGK';
+        if (v === 'BS' || v.includes('BENAR') || v.includes('SALAH') || v.includes('TRUE')) return 'BS';
+        return 'PG';
+      }
+
+      function parseDelimitedRows(text) {
+        const clean = String(text || '').replace(/^\uFEFF/, '');
+        const firstLine = clean.split(/\r?\n/)[0] || '';
+        let delimiter = ',';
+        const tabCount = (firstLine.match(/\t/g) || []).length;
+        const semiCount = (firstLine.match(/;/g) || []).length;
+        const commaCount = (firstLine.match(/,/g) || []).length;
+        if (tabCount > commaCount && tabCount >= semiCount) delimiter = '\t';
+        else if (semiCount > commaCount) delimiter = ';';
+
+        const rows = [];
+        let row = [];
+        let cell = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < clean.length; i++) {
+          const ch = clean[i];
+          const next = clean[i + 1];
+          if (inQuotes) {
+            if (ch === '"' && next === '"') {
+              cell += '"';
+              i++;
+            } else if (ch === '"') {
+              inQuotes = false;
+            } else {
+              cell += ch;
+            }
+          } else {
+            if (ch === '"') {
+              inQuotes = true;
+            } else if (ch === delimiter) {
+              row.push(cell.trim());
+              cell = '';
+            } else if (ch === '\r' && next === '\n') {
+              row.push(cell.trim());
+              rows.push(row);
+              row = [];
+              cell = '';
+              i++;
+            } else if (ch === '\n' || ch === '\r') {
+              row.push(cell.trim());
+              rows.push(row);
+              row = [];
+              cell = '';
+            } else {
+              cell += ch;
+            }
+          }
+        }
+        if (cell.length > 0 || row.length > 0) {
+          row.push(cell.trim());
+          rows.push(row);
+        }
+        return rows.filter((r) => r.some((c) => c.length > 0));
+      }
+
+      function mapRecordToQuestion(obj) {
+        const getVal = (keys) => {
+          for (const k of keys) {
+            if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') {
+              return String(obj[k]).trim();
+            }
+          }
+          return '';
+        };
+
+        const type = normalizeQuestionType(getVal(['Tipe_Soal', 'tipe_soal', 'tipe', 'type', 'jenis', 'jenis_soal']));
+        const question = getVal(['Pertanyaan', 'pertanyaan', 'soal', 'question', 'teks']);
+        if (!question) return null;
+
+        const opts = obj.options || {};
+        const optA = opts.A || getVal(['Opsi_A', 'opsi_a', 'a', 'A']);
+        const optB = opts.B || getVal(['Opsi_B', 'opsi_b', 'b', 'B']);
+        const optC = opts.C || getVal(['Opsi_C', 'opsi_c', 'c', 'C']);
+        const optD = opts.D || getVal(['Opsi_D', 'opsi_d', 'd', 'D']);
+        const optE = opts.E || getVal(['Opsi_E', 'opsi_e', 'e', 'E']);
+
+        let rawAnswer = getVal(['Kunci_Jawaban', 'kunci_jawaban', 'kunci', 'jawaban', 'answer']);
+        if (type === 'BS') {
+          rawAnswer = rawAnswer.toLowerCase().startsWith('s') || rawAnswer.toLowerCase() === 'false' ? 'Salah' : 'Benar';
+        } else if (type === 'PGK') {
+          rawAnswer = rawAnswer
+            .toUpperCase()
+            .split(/[,;\s]+/)
+            .filter((x) => ['A', 'B', 'C', 'D', 'E'].includes(x))
+            .sort()
+            .join(',');
+        } else {
+          const single = rawAnswer.toUpperCase().replace(/[^A-E]/g, '').charAt(0);
+          rawAnswer = single || 'A';
+        }
+
+        return {
+          id: 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+          type,
+          topic: getVal(['Topik_KD', 'topik_kd', 'topik', 'kd', 'topic']) || 'Umum',
+          question,
+          imageUrl: getVal(['Link_Gambar', 'link_gambar', 'gambar', 'image', 'imageUrl']),
+          options:
+            type === 'BS'
+              ? { A: 'Benar', B: 'Salah', C: '', D: '', E: '' }
+              : { A: optA, B: optB, C: optC, D: optD, E: optE },
+          answer: rawAnswer || (type === 'BS' ? 'Benar' : 'A'),
+          weight: safeNum(getVal(['Bobot_Skor', 'bobot_skor', 'bobot', 'weight']), 4) || 4,
+          explanation: getVal(['Pembahasan', 'pembahasan', 'explanation']),
+        };
+      }
+
+      // ==================== PROMPT BUILDERS ====================
+      function getSecurityFeaturesList() {
+        const items = [];
+        const maxV = safeNum(state.maxViolations, 3) || 3;
+        if (state.secFullscreen) {
+          items.push('**Fullscreen Lock**: Meminta mode layar penuh saat ujian dimulai dan memunculkan overlay peringatan jika siswa keluar dari layar penuh.');
+        }
+        if (state.secTabDetect) {
+          items.push(`**Deteksi Pindah Tab / Split-Screen / Window Blur**: Memantau event \`visibilitychange\` dan \`blur\`. Setiap pelanggaran dicatat dan diperingatkan; jika mencapai **${maxV} kali pelanggaran**, ujian langsung **auto-submit** secara otomatis.`);
+        }
+        if (state.secAntiCopy) {
+          items.push('**Blokir Copy-Paste, Klik Kanan & DevTools**: Menonaktifkan `contextmenu`, seleksi teks pada soal, `Ctrl+C/V/U/S`, `PrintScreen`, dan shortcut DevTools (`F12`, `Ctrl+Shift+I/J`).');
+        }
+        if (state.secOneAttempt) {
+          items.push('**Kunci 1x Pengerjaan per Siswa**: Validasi nama di `Sheet Daftar_Siswa` & `Sheet Peserta` dengan `LockService.getScriptLock()` agar tidak terjadi submit ganda atau ujian ulang.');
+        }
+        if (state.secWatermark) {
+          items.push('**Watermark Dinamis Anti-Screenshot**: Lapisan watermark transparan diagonal berisi Nama Siswa + Waktu Aktif di atas layar soal.');
+        }
+        if (state.secAutoSave) {
+          items.push('**Auto-Save Lokal (localStorage)**: Menyimpan jawaban sementara dan sisa waktu secara berkala agar progres aman jika jaringan terputus atau halaman ter-refresh.');
+        }
+        if (state.secServerScoring) {
+          items.push('**Zero-Leak Kunci Jawaban & Server-Side Scoring**: Endpoint `getQuestions` DILARANG mengirimkan `Kunci_Jawaban` maupun `Pembahasan` ke browser. Seluruh koreksi, skor, analisis, dan intervensi dihitung 100% di Google Apps Script.');
+        }
+        return items;
+      }
+
+      function formatStudentSection() {
+        const students = getParsedStudents();
+        if (students.length === 0) {
+          return `- Belum ada nama siswa diinput saat ini. Buat array \`DAFTAR_SISWA\` di \`Code.gs\` berisi 10 nama contoh realistis yang mudah diganti guru, dan masukkan otomatis ke \`Sheet Daftar_Siswa\`.`;
+        }
+        return `- Masukkan daftar resmi **${students.length} siswa** berikut ke dalam array \`DAFTAR_SISWA\` di fungsi \`setupDatabase()\` untuk mengisi \`Sheet Daftar_Siswa\` dan ditampilkan pada dropdown/pencarian login peserta:\n${FENCE}javascript\nconst DAFTAR_SISWA = ${JSON.stringify(students, null, 2)};\n${FENCE}`;
+      }
+
+      function formatManualQuestionsAndAttachments(targetTotal) {
+        const questions = Array.isArray(state.manualQuestions) ? state.manualQuestions : [];
+        const files = Array.isArray(state.attachedFiles) ? state.attachedFiles : [];
+
+        if (questions.length === 0 && files.length === 0) {
+          return '';
+        }
+
+        let section = `\n## DATA SOAL MANUAL & LAMPIRAN FILE SOAL (WAJIB DIGUNAKAN)\n`;
+
+        if (questions.length > 0) {
+          const cPG = questions.filter((q) => q.type === 'PG').length;
+          const cPGK = questions.filter((q) => q.type === 'PGK').length;
+          const cBS = questions.filter((q) => q.type === 'BS').length;
+
+          const sheetRows = questions.map((q, idx) => [
+            idx + 1,
+            q.type,
+            q.topic || 'Umum',
+            q.question,
+            q.imageUrl || '',
+            q.type === 'BS' ? 'Benar' : q.options.A || '',
+            q.type === 'BS' ? 'Salah' : q.options.B || '',
+            q.type === 'BS' ? '' : q.options.C || '',
+            q.type === 'BS' ? '' : q.options.D || '',
+            q.type === 'BS' ? '' : q.options.E || '',
+            q.answer,
+            q.weight || 4,
+            q.explanation || '',
+          ]);
+
+          section += `### A. Daftar Soal Manual yang Sudah Diinput (${questions.length} soal: ${cPG} PG, ${cPGK} PGK, ${cBS} BS)\n`;
+          section += `- **Instruksi Wajib**: Masukkan seluruh **${questions.length} butir soal** berikut secara persis ke dalam fungsi \`setupDatabase()\` pada **Sheet \`Soal\`** lengkap dengan jenis soal, opsi jawaban, link gambar, bobot, dan kunci jawaban yang benar.\n`;
+          if (questions.length < targetTotal) {
+            section += `- Karena jumlah soal manual (${questions.length}) belum mencapai target total (${targetTotal} soal), lengkapi sisa **${targetTotal - questions.length} soal** secara otomatis sesuai mata pelajaran **${state.subjectName}** agar tetap memenuhi komposisi soal.\n`;
+          }
+          section += `- **Array Siap Pakai (\`DATA_SOAL_MANUAL\`)** — Urutan kolom: \`[No, Tipe_Soal, Topik_KD, Pertanyaan, Link_Gambar, Opsi_A, Opsi_B, Opsi_C, Opsi_D, Opsi_E, Kunci_Jawaban, Bobot_Skor, Pembahasan]\`:\n`;
+          section += `${FENCE}javascript\nconst DATA_SOAL_MANUAL = ${JSON.stringify(sheetRows, null, 2)};\n${FENCE}\n`;
+        }
+
+        if (files.length > 0) {
+          section += `\n### B. Lampiran File Soal Siap Jadi (${files.length} file)\n`;
+          files.forEach((f, idx) => {
+            section += `${idx + 1}. **${f.name}** (${formatBytes(f.size)}) — `;
+            if (f.mode === 'imported') {
+              section += `File terstruktur telah diimpor otomatis (**${f.importedCount} soal** sudah masuk ke array \`DATA_SOAL_MANUAL\` di atas).\n`;
+            } else if (f.mode === 'text' && f.textContent) {
+              section += `Isi mentah file teks disematkan di bawah ini. Ekstrak seluruh butir soal, jenis soal (\`PG\`/\`PGK\`/\`BS\`), pilihan opsi, dan kunci jawaban benarnya ke dalam \`Sheet Soal\`:\n`;
+              section += `${FENCE}text\n--- MULAI ISI FILE: ${f.name} ---\n${f.textContent}\n--- AKHIR ISI FILE: ${f.name} ---\n${FENCE}\n`;
+            } else {
+              section += `**File dokumen dilampirkan bersama prompt ini** (pastikan file \`${f.name}\` diunggah di chat AI). Instruksi untuk AI: Baca dan ekstrak seluruh soal, jenis soal, pilihan jawaban, serta kunci jawaban benarnya dari file \`${f.name}\`, konversi rumus matematika/fisika ke format LaTeX MathJax jika ada, lalu masukkan ke \`setupDatabase()\` untuk \`Sheet Soal\`.\n`;
+            }
+          });
+        }
+
+        return section;
+      }
+
+      function buildMasterPrompt() {
+        const pg = safeNum(state.countPG, 9);
+        const pgk = safeNum(state.countPGK, 8);
+        const bs = safeNum(state.countBS, 8);
+        const total = pg + pgk + bs;
+        const durasi = safeNum(state.durationMinutes, 60);
+        const kkm = safeNum(state.passingScore, 75);
+        const secList = getSecurityFeaturesList();
+        const studentSection = formatStudentSection();
+        const manualQuestionsSection = formatManualQuestionsAndAttachments(total);
+        const extra = state.extraNotes.trim()
+          ? `\n## 8. CATATAN & INSTRUKSI TAMBAHAN\n${state.extraNotes.trim()}\n`
+          : '';
+
+        const pgkDesc =
+          state.pgkScoringMode === 'partial'
+            ? 'Skor Parsial (proporsional berdasarkan jumlah pilihan benar yang tepat tanpa memilih pengecoh salah).'
+            : 'All-or-Nothing (siswa mendapat skor penuh hanya jika seluruh kunci jawaban yang dipilih tepat persis).';
+
+        const randomDesc =
+          state.randomizeMode === 'all'
+            ? 'Acak seluruh urutan nomor soal dan acak opsi A–E pada soal PG.'
+            : state.randomizeMode === 'ordered'
+            ? 'Tampilkan soal secara berurutan sesuai nomor di Sheet Soal.'
+            : 'Acak urutan soal di dalam masing-masing kelompok tipe (PG → PGK → BS).';
+
+        const hasCustomBank = state.manualQuestions.length > 0 || state.attachedFiles.length > 0;
+
+        return `# PROMPT PENGEMBANGAN APLIKASI CBT FULLSTACK (GITHUB PAGES + GOOGLE APPS SCRIPT)
+
+Bertindaklah sebagai **Senior Fullstack Web App Developer** yang berpengalaman membangun sistem Computer Based Test (CBT) modern, aman, cepat, dan ramah pengguna di **HP, Tablet, maupun Laptop**.
+
+## 1. IDENTITAS & SPESIFIKASI UJIAN
+- **Nama Sekolah**: ${state.schoolName || 'Sekolah'}
+- **Logo Sekolah (URL Langsung)**: \`${state.schoolLogoUrl || 'https://iili.io/Ce8iqts.png'}\` (tampilkan rapi pada halaman login, header ujian, dan layar selesai dengan fallback \`onerror\`).
+- **Judul Ujian**: ${state.examTitle || 'Ujian CBT'}
+- **Mata Pelajaran**: ${state.subjectName || 'Matematika'}
+- **Kelas / Tingkat**: ${state.gradeLevel || '-'}
+- **Token Masuk Ujian**: \`${(state.examToken || 'CBT2026').toUpperCase()}\`
+- **Durasi Pengerjaan**: **${durasi} menit** (countdown timer sinkron + auto-submit saat waktu habis).
+- **KKM / KKTP**: **${kkm}** (acuan otomatis untuk kolom Intervensi Lanjutan).
+- **Komposisi Soal (Total ${total} Nomor)**:
+  - **${pg} soal** Pilihan Ganda (\`PG\`) — radio button, 1 jawaban benar.
+  - **${pgk} soal** Pilihan Ganda Kompleks / MCMA (\`PGK\`) — checkbox, lebih dari 1 jawaban benar. Skema penilaian: ${pgkDesc}
+  - **${bs} soal** Benar / Salah (\`BS\`) — pilihan tombol \`Benar\` atau \`Salah\`.
+- **Urutan / Pengacakan Soal**: ${randomDesc}
+
+## 2. ARSITEKTUR SISTEM (CORS-SAFE)
+- **Frontend**: 1 file \`index.html\` mandiri (HTML + Tailwind CSS CDN + Vanilla JS) siap di-hosting di **GitHub Pages**.
+- **Backend**: 1 file \`Code.gs\` di **Google Apps Script** yang terikat langsung pada **Google Spreadsheet** (Ekstensi > Apps Script).
+- **Penanganan CORS Wajib**:
+  - Frontend mengirim \`POST\` menggunakan \`Content-Type: text/plain;charset=utf-8\` (JSON stringified) agar tidak memicu preflight CORS error di Apps Script.
+  - Backend menyediakan \`doGet(e)\` dan \`doPost(e)\` yang selalu mengembalikan \`ContentService.createTextOutput(JSON.stringify(...)).setMimeType(ContentService.MimeType.JSON)\`.
+
+## 3. SETUP DATABASE OTOMATIS (\`setupDatabase()\`)
+Buat fungsi \`setupDatabase()\` di \`Code.gs\` yang dapat dijalankan 1 klik dari editor Apps Script untuk membuat dan memformat 3 sheet secara otomatis (idempoten, dengan header berwarna rapi, freeze row 1, dan lebar kolom proporsional):
+
+### A. Sheet \`Soal\`
+Header kolom (baris 1):
+\`No\` | \`Tipe_Soal\` (\`PG\`, \`PGK\`, \`BS\`) | \`Topik_KD\` | \`Pertanyaan\` | \`Link_Gambar\` | \`Opsi_A\` | \`Opsi_B\` | \`Opsi_C\` | \`Opsi_D\` | \`Opsi_E\` | \`Kunci_Jawaban\` | \`Bobot_Skor\` | \`Pembahasan\`
+- ${hasCustomBank ? 'Prioritaskan seluruh soal dari bagian **DATA SOAL MANUAL & LAMPIRAN FILE SOAL** di bawah untuk mengisi Sheet Soal secara otomatis melalui `setupDatabase()`.' : `Sertakan seed data otomatis sebanyak **${total} baris** (${pg} PG, ${pgk} PGK, ${bs} BS) yang relevan dengan mapel **${state.subjectName}** (menggunakan sintaks LaTeX MathJax${state.useFreeImage ? ' dan contoh link gambar freeimage.host' : ''}) agar aplikasi langsung siap diuji!`}
+
+### B. Sheet \`Daftar_Siswa\`
+Header kolom: \`No\` | \`Nama_Siswa\` | \`Status\` (\`Belum\` / \`Selesai\`) | \`Pelanggaran\` | \`Waktu_Submit\`
+${studentSection}
+
+### C. Sheet \`Peserta\` (URUTAN KOLOM WAJIB PERSIS)
+Header kolom (baris 1):
+1. \`Nama\`
+2. \`Waktu Mulai\` (format \`yyyy-MM-dd HH:mm:ss\`)
+3. \`Waktu Selesai\` (format \`yyyy-MM-dd HH:mm:ss\`)
+4. \`Durasi Pengerjaan (Menit)\` (hitung otomatis selisih waktu selesai dan mulai dalam satuan menit, 1 desimal)
+5. \`Jumlah Skor\` (skala 0–100)
+6. \`Jumlah Jawaban Benar\`
+7. \`Jumlah Jawaban Salah\`
+8. \`Analisis Jawaban Siswa\` (ringkasan detail per nomor/tipe & topik KD yang dikuasai vs lemah, contoh: \`PG: 8/9, PGK: 6/8, BS: 7/8 | Lemah di: Turunan, Trigonometri\`)
+9. \`Intervensi Lanjutan\` (rekomendasi otomatis berdasarkan KKM **${kkm}**:
+   - Skor >= 90: \`Pengayaan (Materi HOTS / Tutor Sebaya)\`
+   - Skor ${kkm}–89: \`Tuntas — Latihan Pemantapan pada topik yang masih salah\`
+   - Skor < ${kkm}: \`Remedial Terbimbing — Wajib mengulang materi pada topik lemah\`)
+
+## 4. RENDERING MATEMATIKA, RUMUS & GAMBAR
+${state.useMathJax ? '- **MathJax v3**: Muat MathJax v3 CDN di `index.html` dengan konfigurasi inline (`$...$`, `\\(...\\)`) dan display (`$$...$$`, `\\[...\\]`). Panggil `MathJax.typesetPromise()` setiap kali berpindah nomor soal atau memuat opsi agar seluruh rumus Matematika, Fisika, dan Kimia tampil tajam.' : '- Tampilkan teks soal dengan tipografi bersih dan dukungan simbol Unicode.'}
+${state.useFreeImage ? '- **Soal Bergambar (`freeimage.host`)**: Jika kolom `Link_Gambar` terisi (misalnya URL `https://iili.io/...`), tampilkan gambar responsif dengan lazy loading, fallback `onerror`, dan fitur klik untuk **Zoom Lightbox** agar mudah dibaca di layar HP.' : '- Dukung penyematan gambar opsional dari URL.'}
+
+## 5. KEAMANAN ANTI-CURANG BERLAPIS
+${secList.map((item, idx) => `${idx + 1}. ${item}`).join('\n')}
+
+## 6. DESAIN UI/UX RESPONSIF (HP, TABLET, LAPTOP)
+- Tampilan modern, bersih, ramah sentuh (*touch-friendly*), tanpa horizontal scroll.
+- **Halaman Login**: Logo sekolah, judul ujian, dropdown/pencarian Nama Siswa dari server, input Token Ujian, informasi jumlah soal (${total}) & waktu (${durasi} menit), serta tombol Mulai Ujian.
+- **Halaman Pengerjaan**: Sticky header (logo, nama siswa, countdown timer berubah merah saat < 5 menit, indikator pelanggaran), kartu soal responsif, tombol **Ragu-ragu**, navigasi Sebelumnya/Berikutnya, serta **Grid Nomor Soal** (drawer di HP, sidebar di laptop) dengan kode warna status (Belum dijawab, Sudah dijawab, Ragu-ragu).
+- **Modal Konfirmasi & Layar Selesai**: Gunakan custom modal (JANGAN gunakan \`alert()\` atau \`confirm()\`). Setelah submit, tampilkan ringkasan status pengiriman berhasil beserta waktu selesai & durasi.
+
+## 7. FORMAT OUTPUT YANG DIHARAPKAN
+Berikan kode secara lengkap, siap pakai tanpa placeholder (\`...\`), terbagi menjadi:
+1. **\`Code.gs\`** (Backend Google Apps Script lengkap dengan \`setupDatabase()\`, \`doGet\`, \`doPost\`, penilaian server, analisis jawaban, dan intervensi lanjutan).
+2. **\`index.html\`** (Frontend lengkap siap unggah ke GitHub Pages).
+3. **Panduan singkat deploy** (mengisi \`API_URL\` di \`index.html\` dan publish Web App).
+${manualQuestionsSection}${extra}`;
+      }
+
+      function buildBackendPrompt() {
+        const pg = safeNum(state.countPG, 9);
+        const pgk = safeNum(state.countPGK, 8);
+        const bs = safeNum(state.countBS, 8);
+        const total = pg + pgk + bs;
+        const durasi = safeNum(state.durationMinutes, 60);
+        const kkm = safeNum(state.passingScore, 75);
+        const studentSection = formatStudentSection();
+        const manualQuestionsSection = formatManualQuestionsAndAttachments(total);
+
+        return `# TAHAP 1: BACKEND GOOGLE APPS SCRIPT (\`Code.gs\`) — APLIKASI CBT
+
+Buat file **\`Code.gs\`** lengkap (100% utuh, siap tempel di Ekstensi > Apps Script pada Google Spreadsheet) untuk sistem CBT **${state.examTitle} — ${state.subjectName}** (${state.schoolName}).
+
+## SPESIFIKASI BACKEND WAJIB
+1. **Konstanta Konfigurasi**:
+   - \`TOKEN_UJIAN = "${(state.examToken || 'CBT2026').toUpperCase()}"\`
+   - \`DURASI_MENIT = ${durasi}\`
+   - \`KKM = ${kkm}\`
+   - \`SKEMA_PGK = "${state.pgkScoringMode}"\` (\`exact\` atau \`partial\`)
+2. **Fungsi \`setupDatabase()\` (1-Klik Auto Setup)**:
+   - Membuat/memformat 3 sheet:
+     - **\`Soal\`**: \`No | Tipe_Soal | Topik_KD | Pertanyaan | Link_Gambar | Opsi_A | Opsi_B | Opsi_C | Opsi_D | Opsi_E | Kunci_Jawaban | Bobot_Skor | Pembahasan\` (isi otomatis ${total} soal: ${pg} PG, ${pgk} PGK, ${bs} BS).
+     - **\`Daftar_Siswa\`**: \`No | Nama_Siswa | Status | Pelanggaran | Waktu_Submit\`.
+${studentSection}
+     - **\`Peserta\`** (urutan kolom persis): \`Nama | Waktu Mulai | Waktu Selesai | Durasi Pengerjaan (Menit) | Jumlah Skor | Jumlah Jawaban Benar | Jumlah Jawaban Salah | Analisis Jawaban Siswa | Intervensi Lanjutan\`.
+3. **Endpoint API (\`doGet\` & \`doPost\`)**:
+   - Parsing payload JSON dari \`e.postData.contents\` (mendukung \`text/plain\` CORS-safe dari GitHub Pages).
+   - Action \`getInitData\`: Mengembalikan metadata ujian, URL logo (\`${state.schoolLogoUrl}\`), durasi, dan daftar nama siswa yang berstatus \`Belum\`.
+   - Action \`startExam\`: Validasi nama siswa + token ujian + cek status belum pernah mengerjakan. Mengembalikan daftar soal **TANPA** \`Kunci_Jawaban\` dan **TANPA** \`Pembahasan\` (Zero-Leak).
+   - Action \`submitExam\`:
+     - Gunakan \`LockService.getScriptLock()\` untuk mencegah duplikasi submit.
+     - Hitung \`Durasi Pengerjaan (Menit)\` dari timestamp mulai & selesai.
+     - Koreksi seluruh jawaban \`PG\`, \`PGK\`, dan \`BS\` di server.
+     - Susun \`Analisis Jawaban Siswa\` (rekap benar/salah per tipe soal & daftar \`Topik_KD\` yang masih salah).
+     - Susun \`Intervensi Lanjutan\` otomatis berdasarkan KKM **${kkm}**.
+     - Simpan baris baru ke \`Sheet Peserta\` dan perbarui status siswa menjadi \`Selesai\` di \`Sheet Daftar_Siswa\`.
+${manualQuestionsSection}
+Tuliskan seluruh kode \`Code.gs\` secara utuh tanpa disingkat.`;
+      }
+
+      function buildFrontendPrompt() {
+        const pg = safeNum(state.countPG, 9);
+        const pgk = safeNum(state.countPGK, 8);
+        const bs = safeNum(state.countBS, 8);
+        const total = pg + pgk + bs;
+        const durasi = safeNum(state.durationMinutes, 60);
+        const secList = getSecurityFeaturesList();
+
+        return `# TAHAP 2: FRONTEND WEB RESPONSIF (\`index.html\`) — HOSTING GITHUB PAGES
+
+Buat 1 file **\`index.html\`** mandiri (HTML + Tailwind CSS CDN + Vanilla JS) yang terhubung ke Web App Google Apps Script (\`const API_URL = "PASTE_URL_WEB_APP_GAS_DISINI";\`) untuk aplikasi CBT **${state.examTitle} — ${state.subjectName}** (${state.schoolName}).
+
+## SPESIFIKASI FRONTEND WAJIB
+1. **Branding & Responsif Mobile-First**:
+   - Gunakan logo sekolah dari URL: \`${state.schoolLogoUrl || 'https://iili.io/Ce8iqts.png'}\` (dengan fallback \`onerror\`).
+   - Tampilan sangat nyaman digunakan di **HP, Tablet, dan Laptop**, tombol sentuh besar, tanpa horizontal scroll.
+2. **Dukungan 3 Tipe Soal (${total} Nomor: ${pg} PG, ${pgk} PGK/MCMA, ${bs} Benar-Salah)**:
+   - **PG**: Kartu opsi radio A–E yang jelas dan mudah disentuh.
+   - **PGK (MCMA)**: Kartu opsi checkbox dengan petunjuk "Pilih lebih dari satu jawaban yang benar".
+   - **BS**: Dua tombol kartu besar **BENAR** dan **SALAH**.
+3. **MathJax & Gambar \`freeimage.host\`**:
+   - ${state.useMathJax ? 'Integrasikan **MathJax v3** untuk merender rumus Matematika, Fisika, dan Kimia secara dinamis (`MathJax.typesetPromise()`) setiap kali soal berganti.' : 'Tipografi bersih untuk teks soal.'}
+   - ${state.useFreeImage ? 'Tampilkan gambar soal dari kolom `Link_Gambar` (`freeimage.host` / `iili.io`) lengkap dengan fitur klik untuk **Zoom Lightbox**.' : 'Dukung tampilan gambar soal responsif.'}
+4. **Komunikasi Backend CORS-Safe**:
+   - Kirim semua request POST dengan \`headers: { 'Content-Type': 'text/plain;charset=utf-8' }\` dan \`JSON.stringify(payload)\`.
+   - Tangani loading state, retry saat jaringan lemah, dan modal notifikasi modern (tanpa \`alert()\` atau \`confirm()\`).
+5. **Fitur Keamanan Anti-Curang**:
+${secList.map((item, idx) => `   ${idx + 1}. ${item}`).join('\n')}
+6. **Fitur Navigasi Ujian**:
+   - Timer mundur **${durasi} menit** (auto-submit saat 00:00).
+   - Tombol **Ragu-ragu**, navigasi Sebelumnya/Berikutnya, serta **Panel Navigasi Nomor Soal** (drawer di HP, sidebar di laptop).
+   - Layar selesai menampilkan ucapan terima kasih, nama peserta, waktu mulai–selesai, dan durasi pengerjaan.
+
+Tuliskan seluruh kode \`index.html\` secara utuh dan langsung dapat di-hosting di GitHub Pages.`;
+      }
+
+      function buildQuestionBankPrompt() {
+        const pg = safeNum(state.countPG, 9);
+        const pgk = safeNum(state.countPGK, 8);
+        const bs = safeNum(state.countBS, 8);
+        const total = pg + pgk + bs;
+        const manualQuestionsSection = formatManualQuestionsAndAttachments(total);
+
+        return `# TAHAP 3: GENERATOR BANK SOAL (${total} NOMOR SIAP IMPOR KE SHEET SOAL)
+
+Buatkan/lengkapi bank soal lengkap untuk mata pelajaran **${state.subjectName}** (${state.gradeLevel}) — **${state.examTitle}** dengan rincian persis:
+- **${pg} soal** Pilihan Ganda (\`PG\`) — 1 kunci jawaban (\`A\`/\`B\`/\`C\`/\`D\`/\`E\`).
+- **${pgk} soal** Pilihan Ganda Kompleks / MCMA (\`PGK\`) — 2 atau 3 kunci jawaban dipisah koma (contoh: \`A,C,D\`).
+- **${bs} soal** Benar / Salah (\`BS\`) — kunci jawaban \`Benar\` atau \`Salah\`.
+
+## KETENTUAN FORMAT
+1. Gunakan notasi **LaTeX MathJax** (\`$...$\` dan \`$$...$$\`) untuk seluruh persamaan Matematika, Fisika, atau simbol ilmiah.
+2. Sertakan variasi \`Topik_KD\` yang jelas di setiap soal agar fitur **Analisis Jawaban Siswa** dan **Intervensi Lanjutan** berjalan akurat.
+3. Kolom \`Link_Gambar\` diisi link gambar \`freeimage.host\` (atau dikosongkan \`""\` jika soal tidak memerlukan gambar).
+4. Sajikan output dalam **2 format siap pakai**:
+   - **Format A**: Tabel CSV dengan header: \`No,Tipe_Soal,Topik_KD,Pertanyaan,Link_Gambar,Opsi_A,Opsi_B,Opsi_C,Opsi_D,Opsi_E,Kunci_Jawaban,Bobot_Skor,Pembahasan\`.
+   - **Format B**: Array JavaScript (\`const DATA_SOAL = [...]\`) yang siap langsung ditempel ke dalam fungsi \`setupDatabase()\` di \`Code.gs\`.
+5. Pastikan total \`Bobot_Skor\` dari ke-${total} soal berjumlah tepat **100 poin**.${manualQuestionsSection}`;
+      }
+
+      function getCurrentPromptText() {
+        switch (state.activeTab) {
+          case 'backend':
+            return buildBackendPrompt();
+          case 'frontend':
+            return buildFrontendPrompt();
+          case 'questions':
+            return buildQuestionBankPrompt();
+          case 'master':
+          default:
+            return buildMasterPrompt();
+        }
+      }
+
+      // ==================== UI SYNC & RENDERING ====================
+      function updateLogoPreviews() {
+        const url = (state.schoolLogoUrl || '').trim() || 'https://iili.io/Ce8iqts.png';
+        el.navSchoolLogo.src = url;
+        el.bannerSchoolLogo.src = url;
+        el.inputLogoPreview.src = url;
+      }
+
+      function updateTabButtons() {
+        document.querySelectorAll('.prompt-tab').forEach((btn) => {
+          const isActive = btn.dataset.tab === state.activeTab;
+          if (isActive) {
+            btn.className = 'prompt-tab px-2.5 py-2 rounded-xl text-[11px] font-bold transition bg-indigo-600 text-white shadow-sm';
+          } else {
+            btn.className = 'prompt-tab px-2.5 py-2 rounded-xl text-[11px] font-semibold transition bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700';
+          }
+        });
+      }
+
+      function renderLiveOutputs() {
+        const pg = safeNum(state.countPG, 9);
+        const pgk = safeNum(state.countPGK, 8);
+        const bs = safeNum(state.countBS, 8);
+        const total = pg + pgk + bs;
+        const durasi = safeNum(state.durationMinutes, 60);
+        const students = getParsedStudents();
+        const manualCount = Array.isArray(state.manualQuestions) ? state.manualQuestions.length : 0;
+        const fileCount = Array.isArray(state.attachedFiles) ? state.attachedFiles.length : 0;
+
+        el.bannerTitlePreview.textContent = `${state.examTitle || 'Ujian CBT'} — ${state.subjectName || 'Mata Pelajaran'}`;
+        el.badgeTotalSoal.textContent = `Total: ${total} Soal`;
+        el.bannerTotalSoal.textContent = total;
+        el.bannerSoalManual.textContent = manualCount;
+        el.bannerDurasi.textContent = `${durasi}m`;
+        el.bannerTotalSiswa.textContent = students.length;
+        el.badgeStudentCount.textContent = `${students.length} Siswa`;
+
+        const promptText = getCurrentPromptText();
+        el.promptOutput.value = promptText;
+        el.promptOutputModal.value = promptText;
+
+        el.statCharCount.textContent = `${promptText.length.toLocaleString('id-ID')} karakter`;
+        el.statTokenEstimate.textContent = `~${Math.ceil(promptText.length / 4).toLocaleString('id-ID')} token`;
+
+        if (manualCount > 0 || fileCount > 0) {
+          el.statAttachmentIndicator.classList.remove('hidden');
+          const parts = [];
+          if (manualCount > 0) parts.push(`${manualCount} Soal`);
+          if (fileCount > 0) parts.push(`${fileCount} File`);
+          el.statAttachmentIndicator.textContent = `Tersisip: ${parts.join(' + ')}`;
+        } else {
+          el.statAttachmentIndicator.classList.add('hidden');
+        }
+      }
+
+      function syncFormFromState() {
+        el.schoolName.value = state.schoolName;
+        el.examTitle.value = state.examTitle;
+        el.subjectName.value = state.subjectName;
+        el.gradeLevel.value = state.gradeLevel;
+        el.passingScore.value = state.passingScore;
+        el.schoolLogoUrl.value = state.schoolLogoUrl;
+        el.examToken.value = state.examToken;
+        el.countPG.value = state.countPG;
+        el.countPGK.value = state.countPGK;
+        el.countBS.value = state.countBS;
+        el.durationMinutes.value = state.durationMinutes;
+        el.pgkScoringMode.value = state.pgkScoringMode;
+        el.randomizeMode.value = state.randomizeMode;
+        el.useMathJax.checked = Boolean(state.useMathJax);
+        el.useFreeImage.checked = Boolean(state.useFreeImage);
+        el.studentList.value = state.studentList;
+        el.secFullscreen.checked = Boolean(state.secFullscreen);
+        el.secTabDetect.checked = Boolean(state.secTabDetect);
+        el.secAntiCopy.checked = Boolean(state.secAntiCopy);
+        el.secOneAttempt.checked = Boolean(state.secOneAttempt);
+        el.secWatermark.checked = Boolean(state.secWatermark);
+        el.secAutoSave.checked = Boolean(state.secAutoSave);
+        el.secServerScoring.checked = Boolean(state.secServerScoring);
+        el.maxViolations.value = state.maxViolations;
+        el.extraNotes.value = state.extraNotes;
+
+        updateLogoPreviews();
+        updateTabButtons();
+        updateQuestionTypeUI();
+        renderManualQuestionsList();
+        renderAttachedFilesList();
+        renderLiveOutputs();
+      }
+
+      // ==================== MANUAL QUESTIONS & FILE ATTACHMENT CONTROLLERS ====================
+      function updateQuestionTypeUI() {
+        const type = el.qType.value;
+        const pgRadios = document.querySelectorAll('.q-correct-pg');
+        const pgkChecks = document.querySelectorAll('.q-correct-pgk');
+
+        if (type === 'BS') {
+          el.qOptionsPGContainer.classList.add('hidden');
+          el.qOptionsBSContainer.classList.remove('hidden');
+          el.qOptionsBSContainer.classList.add('grid');
+          el.qAnswerHint.textContent = 'Pilih kunci jawaban: BENAR atau SALAH';
+        } else {
+          el.qOptionsPGContainer.classList.remove('hidden');
+          el.qOptionsBSContainer.classList.add('hidden');
+          el.qOptionsBSContainer.classList.remove('grid');
+
+          if (type === 'PGK') {
+            pgRadios.forEach((r) => r.classList.add('hidden'));
+            pgkChecks.forEach((c) => c.classList.remove('hidden'));
+            el.qAnswerHint.textContent = 'Centang 2 atau lebih opsi yang benar (MCMA)';
+          } else {
+            pgRadios.forEach((r) => r.classList.remove('hidden'));
+            pgkChecks.forEach((c) => c.classList.add('hidden'));
+            el.qAnswerHint.textContent = 'Pilih 1 opsi sebagai kunci jawaban benar';
+          }
+        }
+        highlightSelectedOptionRows();
+      }
+
+      function highlightSelectedOptionRows() {
+        const type = el.qType.value;
+        document.querySelectorAll('.q-opt-row').forEach((row) => {
+          let isChecked = false;
+          if (type === 'PG') {
+            const radio = row.querySelector('.q-correct-pg');
+            isChecked = radio && radio.checked;
+          } else if (type === 'PGK') {
+            const chk = row.querySelector('.q-correct-pgk');
+            isChecked = chk && chk.checked;
+          }
+          if (isChecked) {
+            row.classList.add('border-emerald-500', 'bg-emerald-50/70', 'dark:bg-emerald-950/30');
+            row.classList.remove('border-slate-200', 'dark:border-slate-700');
+          } else {
+            row.classList.remove('border-emerald-500', 'bg-emerald-50/70', 'dark:bg-emerald-950/30');
+            row.classList.add('border-slate-200', 'dark:border-slate-700');
+          }
+        });
+
+        document.querySelectorAll('.bs-choice-card').forEach((card) => {
+          const radio = card.querySelector('.q-correct-bs');
+          if (radio && radio.checked) {
+            if (radio.value === 'Benar') {
+              card.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/40');
+              card.classList.remove('border-slate-200', 'dark:border-slate-700', 'border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/40');
+            } else {
+              card.classList.add('border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/40');
+              card.classList.remove('border-slate-200', 'dark:border-slate-700', 'border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/40');
+            }
+          } else {
+            card.classList.remove('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/40', 'border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/40');
+            card.classList.add('border-slate-200', 'dark:border-slate-700');
+          }
+        });
+      }
+
+      function setQuestionModeTab(mode) {
+        document.querySelectorAll('.qmode-tab').forEach((btn) => {
+          const active = btn.dataset.qmode === mode;
+          if (active) {
+            btn.className = 'qmode-tab py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition bg-white dark:bg-slate-900 text-violet-700 dark:text-violet-300 shadow-sm';
+          } else {
+            btn.className = 'qmode-tab py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+          }
+        });
+        if (mode === 'file') {
+          el.panelManualInput.classList.add('hidden');
+          el.panelFileAttach.classList.remove('hidden');
+        } else {
+          el.panelManualInput.classList.remove('hidden');
+          el.panelFileAttach.classList.add('hidden');
+        }
+      }
+
+      function resetQuestionForm() {
+        editingQuestionId = null;
+        el.formEditIndicator.textContent = 'Mode: Tambah Soal Baru';
+        el.btnSaveQuestionLabel.textContent = 'Tambah ke Daftar Soal';
+        el.btnCancelEditQuestion.classList.add('hidden');
+
+        el.qTopic.value = '';
+        el.qWeight.value = '4';
+        el.qText.value = '';
+        el.qImage.value = '';
+        el.qImagePreviewWrap.classList.add('hidden');
+        el.qOptA.value = '';
+        el.qOptB.value = '';
+        el.qOptC.value = '';
+        el.qOptD.value = '';
+        el.qOptE.value = '';
+        el.qExplanation.value = '';
+
+        document.querySelectorAll('.q-correct-pg, .q-correct-pgk, .q-correct-bs').forEach((inp) => {
+          inp.checked = false;
+        });
+        updateQuestionTypeUI();
+      }
+
+      function populateFormForEdit(questionId) {
+        const q = (state.manualQuestions || []).find((item) => item.id === questionId);
+        if (!q) return;
+
+        setQuestionModeTab('manual');
+        editingQuestionId = q.id;
+        el.formEditIndicator.textContent = `Mode: Mengedit Soal (${q.type})`;
+        el.btnSaveQuestionLabel.textContent = 'Simpan Perubahan Soal';
+        el.btnCancelEditQuestion.classList.remove('hidden');
+
+        el.qType.value = q.type;
+        el.qTopic.value = q.topic || '';
+        el.qWeight.value = q.weight || 4;
+        el.qText.value = q.question || '';
+        el.qImage.value = q.imageUrl || '';
+        if (q.imageUrl) {
+          el.qImagePreview.src = q.imageUrl;
+          el.qImagePreviewWrap.classList.remove('hidden');
+        } else {
+          el.qImagePreviewWrap.classList.add('hidden');
+        }
+        el.qOptA.value = (q.options && q.options.A) || '';
+        el.qOptB.value = (q.options && q.options.B) || '';
+        el.qOptC.value = (q.options && q.options.C) || '';
+        el.qOptD.value = (q.options && q.options.D) || '';
+        el.qOptE.value = (q.options && q.options.E) || '';
+        el.qExplanation.value = q.explanation || '';
+
+        document.querySelectorAll('.q-correct-pg, .q-correct-pgk, .q-correct-bs').forEach((inp) => {
+          inp.checked = false;
+        });
+
+        if (q.type === 'PG') {
+          const r = document.querySelector(`.q-correct-pg[value="${q.answer}"]`);
+          if (r) r.checked = true;
+        } else if (q.type === 'PGK') {
+          String(q.answer || '')
+            .split(',')
+            .map((s) => s.trim())
+            .forEach((k) => {
+              const c = document.querySelector(`.q-correct-pgk[value="${k}"]`);
+              if (c) c.checked = true;
+            });
+        } else if (q.type === 'BS') {
+          const b = document.querySelector(`.q-correct-bs[value="${q.answer}"]`);
+          if (b) b.checked = true;
+        }
+
+        updateQuestionTypeUI();
+        document.getElementById('cardBankSoalManual').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      function saveManualQuestion() {
+        const type = el.qType.value;
+        const topic = el.qTopic.value.trim() || 'Umum';
+        const weight = safeNum(el.qWeight.value, 4) || 4;
+        const question = el.qText.value.trim();
+        const imageUrl = el.qImage.value.trim();
+        const explanation = el.qExplanation.value.trim();
+
+        if (!question) {
+          showToast('Teks pertanyaan soal wajib diisi.', 'warning');
+          el.qText.focus();
+          return;
+        }
+
+        const options = {
+          A: el.qOptA.value.trim(),
+          B: el.qOptB.value.trim(),
+          C: el.qOptC.value.trim(),
+          D: el.qOptD.value.trim(),
+          E: el.qOptE.value.trim(),
+        };
+
+        let answer = '';
+        if (type === 'PG') {
+          if (!options.A || !options.B) {
+            showToast('Minimal Opsi A dan Opsi B harus diisi untuk soal PG.', 'warning');
+            return;
+          }
+          const selected = document.querySelector('.q-correct-pg:checked');
+          if (!selected) {
+            showToast('Silakan pilih 1 kunci jawaban yang benar.', 'warning');
+            return;
+          }
+          if (!options[selected.value]) {
+            showToast(`Teks Opsi ${selected.value} yang dipilih sebagai kunci tidak boleh kosong.`, 'warning');
+            return;
+          }
+          answer = selected.value;
+        } else if (type === 'PGK') {
+          const filledOpts = Object.values(options).filter(Boolean).length;
+          if (filledOpts < 2) {
+            showToast('Minimal 2 pilihan opsi harus diisi untuk soal PGK (MCMA).', 'warning');
+            return;
+          }
+          const checked = Array.from(document.querySelectorAll('.q-correct-pgk:checked')).map((c) => c.value);
+          if (checked.length === 0) {
+            showToast('Centang minimal 1 jawaban benar untuk soal PGK (MCMA).', 'warning');
+            return;
+          }
+          const emptySelected = checked.find((k) => !options[k]);
+          if (emptySelected) {
+            showToast(`Teks Opsi ${emptySelected} yang dicentang tidak boleh kosong.`, 'warning');
+            return;
+          }
+          answer = checked.sort().join(',');
+        } else if (type === 'BS') {
+          const selected = document.querySelector('.q-correct-bs:checked');
+          if (!selected) {
+            showToast('Silakan pilih kunci jawaban BENAR atau SALAH.', 'warning');
+            return;
+          }
+          answer = selected.value;
+        }
+
+        if (!Array.isArray(state.manualQuestions)) state.manualQuestions = [];
+
+        const payload = {
+          id: editingQuestionId || 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+          type,
+          topic,
+          question,
+          imageUrl,
+          options: type === 'BS' ? { A: 'Benar', B: 'Salah', C: '', D: '', E: '' } : options,
+          answer,
+          weight,
+          explanation,
+        };
+
+        if (editingQuestionId) {
+          const idx = state.manualQuestions.findIndex((item) => item.id === editingQuestionId);
+          if (idx !== -1) state.manualQuestions[idx] = payload;
+          showToast('Perubahan soal berhasil disimpan!', 'success');
+        } else {
+          state.manualQuestions.push(payload);
+          showToast(`Soal #${state.manualQuestions.length} (${type}) berhasil ditambahkan!`, 'success');
+        }
+
+        saveState();
+        resetQuestionForm();
+        renderManualQuestionsList();
+        renderLiveOutputs();
+      }
+
+      function renderManualQuestionsList() {
+        const list = Array.isArray(state.manualQuestions) ? state.manualQuestions : [];
+        const cPG = list.filter((q) => q.type === 'PG').length;
+        const cPGK = list.filter((q) => q.type === 'PGK').length;
+        const cBS = list.filter((q) => q.type === 'BS').length;
+
+        el.manualQuestionCountBadge.textContent = `${list.length} Soal`;
+        el.manualQuestionSummary.textContent = `PG: ${cPG} • PGK: ${cPGK} • BS: ${cBS}`;
+
+        if (list.length > 0) {
+          el.btnSyncCountsFromManual.classList.remove('hidden');
+          el.btnClearAllManualQuestions.classList.remove('hidden');
+        } else {
+          el.btnSyncCountsFromManual.classList.add('hidden');
+          el.btnClearAllManualQuestions.classList.add('hidden');
+          el.manualQuestionsList.innerHTML = `
+            <div class="text-center py-6 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400">
+              Belum ada soal manual dimasukkan. Anda dapat menambahkan soal satu per satu di atas atau mengunggah file soal siap pakai.
+            </div>`;
+          return;
+        }
+
+        const typeStyles = {
+          PG: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300',
+          PGK: 'bg-violet-100 text-violet-700 dark:bg-violet-900/60 dark:text-violet-300',
+          BS: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/60 dark:text-cyan-300',
+        };
+
+        el.manualQuestionsList.innerHTML = list
+          .map((q, index) => {
+            const optsSummary =
+              q.type === 'BS'
+                ? 'Opsi: Benar / Salah'
+                : ['A', 'B', 'C', 'D', 'E']
+                    .filter((k) => q.options && q.options[k])
+                    .map((k) => `${k}. ${escapeHtml(q.options[k])}`)
+                    .join(' | ');
+
+            return `
+              <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div class="flex flex-wrap items-center gap-1.5">
+                    <span class="px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100">#${index + 1}</span>
+                    <span class="px-2 py-0.5 rounded-md text-[11px] font-bold ${typeStyles[q.type] || typeStyles.PG}">${escapeHtml(q.type)}</span>
+                    <span class="px-2 py-0.5 rounded-md text-[11px] font-medium bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">${escapeHtml(q.topic || 'Umum')}</span>
+                    <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300">Kunci: ${escapeHtml(q.answer)}</span>
+                    ${q.imageUrl ? '<span class="px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300">Bergambar</span>' : ''}
+                  </div>
+                  <div class="flex items-center gap-1">
+                    <button type="button" data-move-up="${index}" ${index === 0 ? 'disabled' : ''} class="px-2 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-800 dark:hover:text-white border border-slate-200 dark:border-slate-700 disabled:opacity-30 transition" title="Pindah ke atas">↑</button>
+                    <button type="button" data-move-down="${index}" ${index === list.length - 1 ? 'disabled' : ''} class="px-2 py-1 rounded-lg text-[11px] font-bold bg-white dark:bg-slate-900 text-slate-500 hover:text-slate-800 dark:hover:text-white border border-slate-200 dark:border-slate-700 disabled:opacity-30 transition" title="Pindah ke bawah">↓</button>
+                    <button type="button" data-edit-q="${escapeHtml(q.id)}" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition">
+                      Edit
+                    </button>
+                    <button type="button" data-delete-q="${escapeHtml(q.id)}" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 border border-slate-200 dark:border-slate-700 hover:bg-rose-50 dark:hover:bg-rose-950/60 transition">
+                      Hapus
+                    </button>
+                  </div>
+                </div>
+                <p class="text-xs sm:text-sm font-medium text-slate-800 dark:text-slate-100 leading-relaxed break-words">
+                  ${escapeHtml(q.question)}
+                </p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate" title="${optsSummary}">
+                  ${optsSummary}
+                </p>
+              </div>`;
+          })
+          .join('');
+      }
+
+      function renderAttachedFilesList() {
+        const files = Array.isArray(state.attachedFiles) ? state.attachedFiles : [];
+        if (files.length === 0) {
+          el.attachedFilesWrapper.classList.add('hidden');
+          el.attachedFileCountBadge.classList.add('hidden');
+          el.attachedFilesList.innerHTML = '';
+          return;
+        }
+
+        el.attachedFilesWrapper.classList.remove('hidden');
+        el.attachedFileCountBadge.classList.remove('hidden');
+        el.attachedFileCountBadge.textContent = `${files.length} File`;
+
+        el.attachedFilesList.innerHTML = files
+          .map((f) => {
+            let statusBadge = '';
+            if (f.mode === 'imported') {
+              statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">Auto-Impor (${f.importedCount} soal)</span>`;
+            } else if (f.mode === 'text') {
+              statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">Teks Disematkan ke Prompt</span>`;
+            } else {
+              statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">Lampiran Dokumen AI</span>`;
+            }
+
+            return `
+              <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate max-w-[200px] sm:max-w-xs">${escapeHtml(f.name)}</span>
+                    ${statusBadge}
+                  </div>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Ukuran: ${formatBytes(f.size)} • Format: .${escapeHtml(f.ext || 'file')}
+                  </p>
+                </div>
+                <button type="button" data-remove-file="${escapeHtml(f.id)}" class="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition shrink-0" title="Hapus lampiran">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>`;
+          })
+          .join('');
+      }
+
+      function handleQuestionFiles(fileList) {
+        if (!fileList || fileList.length === 0) return;
+        if (!Array.isArray(state.manualQuestions)) state.manualQuestions = [];
+        if (!Array.isArray(state.attachedFiles)) state.attachedFiles = [];
+
+        Array.from(fileList).forEach((file) => {
+          const ext = (file.name.split('.').pop() || '').toLowerCase();
+          const fileId = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+
+          if (ext === 'csv' || ext === 'tsv') {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              try {
+                const rows = parseDelimitedRows(ev.target.result);
+                if (rows.length < 2) {
+                  showToast(`File ${file.name} tidak memiliki baris data soal.`, 'warning');
+                  return;
+                }
+                const headers = rows[0].map((h) => h.trim());
+                let imported = 0;
+                for (let i = 1; i < rows.length; i++) {
+                  const obj = {};
+                  headers.forEach((h, idx) => {
+                    obj[h] = rows[i][idx] !== undefined ? rows[i][idx] : '';
+                  });
+                  const mapped = mapRecordToQuestion(obj);
+                  if (mapped) {
+                    state.manualQuestions.push(mapped);
+                    imported++;
+                  }
+                }
+                state.attachedFiles.push({
+                  id: fileId,
+                  name: file.name,
+                  size: file.size,
+                  ext,
+                  mode: 'imported',
+                  importedCount: imported,
+                });
+                saveState();
+                renderManualQuestionsList();
+                renderAttachedFilesList();
+                renderLiveOutputs();
+                showToast(`Berhasil mengimpor ${imported} soal dari ${file.name}!`, 'success');
+              } catch (err) {
+                showToast(`Gagal membaca file CSV ${file.name}.`, 'error');
+              }
+            };
+            reader.readAsText(file, 'UTF-8');
+          } else if (ext === 'json') {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              try {
+                const parsed = JSON.parse(ev.target.result);
+                const arr = Array.isArray(parsed) ? parsed : Array.isArray(parsed.questions) ? parsed.questions : [];
+                let imported = 0;
+                arr.forEach((item) => {
+                  const mapped = mapRecordToQuestion(item);
+                  if (mapped) {
+                    state.manualQuestions.push(mapped);
+                    imported++;
+                  }
+                });
+                state.attachedFiles.push({
+                  id: fileId,
+                  name: file.name,
+                  size: file.size,
+                  ext,
+                  mode: 'imported',
+                  importedCount: imported,
+                });
+                saveState();
+                renderManualQuestionsList();
+                renderAttachedFilesList();
+                renderLiveOutputs();
+                showToast(`Berhasil mengimpor ${imported} soal dari ${file.name}!`, 'success');
+              } catch (err) {
+                showToast(`Format JSON pada ${file.name} tidak valid.`, 'error');
+              }
+            };
+            reader.readAsText(file, 'UTF-8');
+          } else if (ext === 'txt' || ext === 'md') {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              const rawText = String(ev.target.result || '').trim();
+              const maxLen = 60000;
+              const clipped = rawText.length > maxLen ? rawText.slice(0, maxLen) + '\n[...teks dipotong karena melebihi batas karakter...]' : rawText;
+              state.attachedFiles.push({
+                id: fileId,
+                name: file.name,
+                size: file.size,
+                ext,
+                mode: 'text',
+                textContent: clipped,
+              });
+              saveState();
+              renderAttachedFilesList();
+              renderLiveOutputs();
+              showToast(`Isi file ${file.name} berhasil disematkan ke prompt!`, 'success');
+            };
+            reader.readAsText(file, 'UTF-8');
+          } else {
+            state.attachedFiles.push({
+              id: fileId,
+              name: file.name,
+              size: file.size,
+              ext,
+              mode: 'reference',
+            });
+            saveState();
+            renderAttachedFilesList();
+            renderLiveOutputs();
+            showToast(`Lampiran ${file.name} ditambahkan ke instruksi prompt.`, 'info');
+          }
+        });
+      }
+
+      function csvEscapeCell(val) {
+        const str = String(val === undefined || val === null ? '' : val);
+        if (/[",\n\r]/.test(str)) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      }
+
+      // ==================== EVENT LISTENERS ====================
+      function bindInput(element, key, isCheckbox = false) {
+        if (!element) return;
+        const evName = isCheckbox || element.tagName === 'SELECT' ? 'change' : 'input';
+        element.addEventListener(evName, () => {
+          state[key] = isCheckbox ? element.checked : element.value;
+          if (key === 'schoolLogoUrl') updateLogoPreviews();
+          saveState();
+          renderLiveOutputs();
+        });
+      }
+
+      bindInput(el.schoolName, 'schoolName');
+      bindInput(el.examTitle, 'examTitle');
+      bindInput(el.subjectName, 'subjectName');
+      bindInput(el.gradeLevel, 'gradeLevel');
+      bindInput(el.passingScore, 'passingScore');
+      bindInput(el.schoolLogoUrl, 'schoolLogoUrl');
+      bindInput(el.examToken, 'examToken');
+      bindInput(el.countPG, 'countPG');
+      bindInput(el.countPGK, 'countPGK');
+      bindInput(el.countBS, 'countBS');
+      bindInput(el.durationMinutes, 'durationMinutes');
+      bindInput(el.pgkScoringMode, 'pgkScoringMode');
+      bindInput(el.randomizeMode, 'randomizeMode');
+      bindInput(el.useMathJax, 'useMathJax', true);
+      bindInput(el.useFreeImage, 'useFreeImage', true);
+      bindInput(el.studentList, 'studentList');
+      bindInput(el.secFullscreen, 'secFullscreen', true);
+      bindInput(el.secTabDetect, 'secTabDetect', true);
+      bindInput(el.secAntiCopy, 'secAntiCopy', true);
+      bindInput(el.secOneAttempt, 'secOneAttempt', true);
+      bindInput(el.secWatermark, 'secWatermark', true);
+      bindInput(el.secAutoSave, 'secAutoSave', true);
+      bindInput(el.secServerScoring, 'secServerScoring', true);
+      bindInput(el.maxViolations, 'maxViolations');
+      bindInput(el.extraNotes, 'extraNotes');
+
+      // Student list helper buttons
+      el.btnFillSampleStudents.addEventListener('click', () => {
+        state.studentList = SAMPLE_STUDENTS.join('\n');
+        el.studentList.value = state.studentList;
+        saveState();
+        renderLiveOutputs();
+        showToast('10 nama siswa contoh berhasil ditambahkan.', 'success');
+      });
+
+      el.btnSortStudents.addEventListener('click', () => {
+        const sorted = getParsedStudents().sort((a, b) => a.localeCompare(b, 'id'));
+        state.studentList = sorted.join('\n');
+        el.studentList.value = state.studentList;
+        saveState();
+        renderLiveOutputs();
+        showToast('Daftar siswa diurutkan A–Z.', 'info');
+      });
+
+      el.btnDedupeStudents.addEventListener('click', () => {
+        const list = getParsedStudents();
+        const seen = new Set();
+        const unique = [];
+        list.forEach((name) => {
+          const key = name.toLowerCase();
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(name);
+          }
+        });
+        const removed = list.length - unique.length;
+        state.studentList = unique.join('\n');
+        el.studentList.value = state.studentList;
+        saveState();
+        renderLiveOutputs();
+        showToast(removed > 0 ? `${removed} nama duplikat dihapus.` : 'Tidak ditemukan nama duplikat.', 'info');
+      });
+
+      el.btnClearStudents.addEventListener('click', () => {
+        state.studentList = '';
+        el.studentList.value = '';
+        saveState();
+        renderLiveOutputs();
+        showToast('Daftar siswa dibersihkan.', 'info');
+      });
+
+      // Prompt tabs
+      document.querySelectorAll('.prompt-tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.activeTab = btn.dataset.tab;
+          saveState();
+          updateTabButtons();
+          renderLiveOutputs();
+        });
+      });
+
+      // Manual Question Mode Tabs & Form Listeners
+      document.querySelectorAll('.qmode-tab').forEach((btn) => {
+        btn.addEventListener('click', () => setQuestionModeTab(btn.dataset.qmode));
+      });
+
+      el.qType.addEventListener('change', updateQuestionTypeUI);
+
+      document.querySelectorAll('.q-correct-pg, .q-correct-pgk, .q-correct-bs').forEach((inp) => {
+        inp.addEventListener('change', highlightSelectedOptionRows);
+      });
+
+      // Quick LaTeX insertion chips
+      document.querySelectorAll('.latex-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          const snippet = chip.dataset.latex || '';
+          const start = el.qText.selectionStart || el.qText.value.length;
+          const end = el.qText.selectionEnd || el.qText.value.length;
+          el.qText.value = el.qText.value.slice(0, start) + snippet + el.qText.value.slice(end);
+          el.qText.focus();
+          el.qText.setSelectionRange(start + snippet.length, start + snippet.length);
+        });
+      });
+
+      el.qImage.addEventListener('input', () => {
+        const url = el.qImage.value.trim();
+        if (url) {
+          el.qImagePreview.src = url;
+          el.qImagePreviewWrap.classList.remove('hidden');
+        } else {
+          el.qImagePreviewWrap.classList.add('hidden');
+        }
+      });
+
+      el.btnSaveQuestion.addEventListener('click', saveManualQuestion);
+      el.btnCancelEditQuestion.addEventListener('click', resetQuestionForm);
+
+      el.btnLoadSampleQuestions.addEventListener('click', () => {
+        if (!Array.isArray(state.manualQuestions)) state.manualQuestions = [];
+        SAMPLE_QUESTIONS.forEach((sq) => {
+          state.manualQuestions.push({
+            ...sq,
+            id: 'q_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+            options: { ...sq.options },
+          });
+        });
+        saveState();
+        renderManualQuestionsList();
+        renderLiveOutputs();
+        showToast('3 contoh soal (PG, PGK, BS) berhasil ditambahkan.', 'success');
+      });
+
+      // Delegate Reorder, Edit, Delete on manual questions list
+      el.manualQuestionsList.addEventListener('click', (e) => {
+        const upBtn = e.target.closest('[data-move-up]');
+        if (upBtn) {
+          const idx = parseInt(upBtn.dataset.moveUp, 10);
+          if (idx > 0) {
+            const temp = state.manualQuestions[idx - 1];
+            state.manualQuestions[idx - 1] = state.manualQuestions[idx];
+            state.manualQuestions[idx] = temp;
+            saveState();
+            renderManualQuestionsList();
+            renderLiveOutputs();
+          }
+          return;
+        }
+        const downBtn = e.target.closest('[data-move-down]');
+        if (downBtn) {
+          const idx = parseInt(downBtn.dataset.moveDown, 10);
+          if (idx < state.manualQuestions.length - 1) {
+            const temp = state.manualQuestions[idx + 1];
+            state.manualQuestions[idx + 1] = state.manualQuestions[idx];
+            state.manualQuestions[idx] = temp;
+            saveState();
+            renderManualQuestionsList();
+            renderLiveOutputs();
+          }
+          return;
+        }
+        const editBtn = e.target.closest('[data-edit-q]');
+        if (editBtn) {
+          populateFormForEdit(editBtn.dataset.editQ);
+          return;
+        }
+        const delBtn = e.target.closest('[data-delete-q]');
+        if (delBtn) {
+          const id = delBtn.dataset.deleteQ;
+          state.manualQuestions = (state.manualQuestions || []).filter((q) => q.id !== id);
+          if (editingQuestionId === id) resetQuestionForm();
+          saveState();
+          renderManualQuestionsList();
+          renderLiveOutputs();
+          showToast('Butir soal dihapus.', 'info');
+        }
+      });
+
+      el.btnSyncCountsFromManual.addEventListener('click', () => {
+        const list = Array.isArray(state.manualQuestions) ? state.manualQuestions : [];
+        if (list.length === 0) return;
+        state.countPG = list.filter((q) => q.type === 'PG').length;
+        state.countPGK = list.filter((q) => q.type === 'PGK').length;
+        state.countBS = list.filter((q) => q.type === 'BS').length;
+        el.countPG.value = state.countPG;
+        el.countPGK.value = state.countPGK;
+        el.countBS.value = state.countBS;
+        saveState();
+        renderLiveOutputs();
+        showToast(`Komposisi disinkronkan: ${state.countPG} PG, ${state.countPGK} PGK, ${state.countBS} BS.`, 'success');
+      });
+
+      el.btnClearAllManualQuestions.addEventListener('click', () => {
+        if (!confirmClearQuestionsArmed) {
+          confirmClearQuestionsArmed = true;
+          el.btnClearAllManualQuestions.textContent = 'Klik Lagi untuk Hapus Semua';
+          setTimeout(() => {
+            confirmClearQuestionsArmed = false;
+            el.btnClearAllManualQuestions.textContent = 'Hapus Semua Soal';
+          }, 3500);
+          return;
+        }
+        confirmClearQuestionsArmed = false;
+        el.btnClearAllManualQuestions.textContent = 'Hapus Semua Soal';
+        state.manualQuestions = [];
+        resetQuestionForm();
+        saveState();
+        renderManualQuestionsList();
+        renderLiveOutputs();
+        showToast('Seluruh soal manual dibersihkan.', 'info');
+      });
+
+      // File Upload & Drag-Drop Listeners
+      el.questionFileInput.addEventListener('change', (e) => {
+        handleQuestionFiles(e.target.files);
+        el.questionFileInput.value = '';
+      });
+
+      el.questionFileDropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        el.questionFileDropzone.classList.add('border-violet-500', 'bg-violet-50/70', 'dark:bg-violet-950/30');
+      });
+
+      el.questionFileDropzone.addEventListener('dragleave', () => {
+        el.questionFileDropzone.classList.remove('border-violet-500', 'bg-violet-50/70', 'dark:bg-violet-950/30');
+      });
+
+      el.questionFileDropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        el.questionFileDropzone.classList.remove('border-violet-500', 'bg-violet-50/70', 'dark:bg-violet-950/30');
+        handleQuestionFiles(e.dataTransfer.files);
+      });
+
+      el.attachedFilesList.addEventListener('click', (e) => {
+        const rmBtn = e.target.closest('[data-remove-file]');
+        if (!rmBtn) return;
+        const id = rmBtn.dataset.removeFile;
+        state.attachedFiles = (state.attachedFiles || []).filter((f) => f.id !== id);
+        saveState();
+        renderAttachedFilesList();
+        renderLiveOutputs();
+        showToast('Lampiran file dihapus.', 'info');
+      });
+
+      el.btnClearAttachedFiles.addEventListener('click', () => {
+        state.attachedFiles = [];
+        saveState();
+        renderAttachedFilesList();
+        renderLiveOutputs();
+        showToast('Semua lampiran file dibersihkan.', 'info');
+      });
+
+      el.btnDownloadCsvTemplate.addEventListener('click', () => {
+        const csvLines = [
+          'Tipe_Soal,Topik_KD,Pertanyaan,Link_Gambar,Opsi_A,Opsi_B,Opsi_C,Opsi_D,Opsi_E,Kunci_Jawaban,Bobot_Skor,Pembahasan',
+          'PG,Turunan Fungsi,"Turunan pertama dari $f(x) = 3x^2 - 5x + 7$ adalah ...","","$6x - 5$","$3x - 5$","$6x + 5$","$6x^2 - 5$","$3x^2 - 5$",A,4,"Aturan pangkat turunan"',
+          'PGK,Persamaan Kuadrat,"Pilih semua pernyataan yang BENAR untuk $x^2 - 5x + 6 = 0$","","Akarnya 2","Hasil kali akar 5","Jumlah akar 5","Diskriminan 1","Akar kembar","A,C,D",4,"Faktor (x-2)(x-3)=0"',
+          'BS,Trigonometri,"Identitas $\\sin^2(\\theta) + \\cos^2(\\theta) = 1$ berlaku untuk semua sudut $\\theta$.","",Benar,Salah,,,,Benar,4,"Identitas Pythagoras"',
+        ];
+        triggerDownload('template_bank_soal_cbt.csv', '\uFEFF' + csvLines.join('\n'), 'text/csv;charset=utf-8');
+        showToast('Template CSV soal berhasil diunduh!', 'success');
+      });
+
+      el.btnExportQuestionsCsv.addEventListener('click', () => {
+        const list = Array.isArray(state.manualQuestions) ? state.manualQuestions : [];
+        if (list.length === 0) {
+          showToast('Belum ada soal manual untuk diekspor ke CSV.', 'warning');
+          return;
+        }
+        const header = 'No,Tipe_Soal,Topik_KD,Pertanyaan,Link_Gambar,Opsi_A,Opsi_B,Opsi_C,Opsi_D,Opsi_E,Kunci_Jawaban,Bobot_Skor,Pembahasan';
+        const rows = list.map((q, idx) =>
+          [
+            idx + 1,
+            q.type,
+            q.topic || 'Umum',
+            q.question,
+            q.imageUrl || '',
+            q.type === 'BS' ? 'Benar' : q.options.A || '',
+            q.type === 'BS' ? 'Salah' : q.options.B || '',
+            q.type === 'BS' ? '' : q.options.C || '',
+            q.type === 'BS' ? '' : q.options.D || '',
+            q.type === 'BS' ? '' : q.options.E || '',
+            q.answer,
+            q.weight || 4,
+            q.explanation || '',
+          ]
+            .map(csvEscapeCell)
+            .join(',')
+        );
+        triggerDownload('bank_soal_cbt_siap_sheets.csv', '\uFEFF' + [header, ...rows].join('\n'), 'text/csv;charset=utf-8');
+        showToast(`${list.length} soal berhasil diekspor ke CSV!`, 'success');
+      });
+
+      el.btnExportQuestionsJson.addEventListener('click', () => {
+        const list = Array.isArray(state.manualQuestions) ? state.manualQuestions : [];
+        if (list.length === 0) {
+          showToast('Belum ada soal manual untuk diekspor.', 'warning');
+          return;
+        }
+        triggerDownload('bank_soal_manual_cbt.json', JSON.stringify(list, null, 2), 'application/json;charset=utf-8');
+        showToast(`${list.length} soal berhasil diekspor ke JSON.`, 'success');
+      });
+
+      // Prompt Copy, Download & Expand
+      el.btnCopyPrompt.addEventListener('click', () => copyTextToClipboard(el.promptOutput.value));
+      el.btnCopyPromptModal.addEventListener('click', () => copyTextToClipboard(el.promptOutputModal.value));
+      el.btnExpandPrompt.addEventListener('click', () => openModal('expandPromptModal'));
+
+      el.btnDownloadPrompt.addEventListener('click', () => {
+        const slug = (state.subjectName || 'cbt').toLowerCase().replace(/[^a-z0-9]+/g, '_');
+        triggerDownload(`prompt_cbt_${slug}_${state.activeTab}.md`, el.promptOutput.value, 'text/markdown;charset=utf-8');
+        showToast('File prompt (.md) berhasil diunduh!', 'success');
+      });
+
+      // Modals & Theme Toggle
+      el.btnOpenDeployGuide.addEventListener('click', () => openModal('deployModal'));
+      el.btnOpenReset.addEventListener('click', () => openModal('resetModal'));
+
+      el.btnConfirmReset.addEventListener('click', () => {
+        state = { ...DEFAULT_STATE, manualQuestions: [], attachedFiles: [] };
+        resetQuestionForm();
+        saveState();
+        syncFormFromState();
+        closeModal('resetModal');
+        showToast('Seluruh pengaturan dikembalikan ke default.', 'info');
+      });
+
+      document.querySelectorAll('[data-close-modal]').forEach((btn) => {
+        btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+      });
+
+      ['deployModal', 'expandPromptModal', 'resetModal'].forEach((id) => {
+        const overlay = document.getElementById(id);
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) closeModal(id);
+        });
+      });
+
+      el.btnThemeToggle.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.toggle('dark');
+        try {
+          localStorage.setItem('cbt_prompt_studio_theme', isDark ? 'dark' : 'light');
+        } catch (e) {}
+      });
+
+      // ==================== INITIALIZE APP ====================
+      syncFormFromState();
+    })();
+  </script>
+</body>
+</html>
